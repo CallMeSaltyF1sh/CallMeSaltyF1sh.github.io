@@ -15,7 +15,7 @@
     <meta name="description" content="">
     <meta name="Cache-Control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>尝试使用express框架+MySQL实现数据接口并部署 · Nancy&#39;s Studio</title>
+    <title>使用express+MySQL实现数据接口并部署 · Nancy&#39;s Studio</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -210,7 +210,7 @@
                 <a href="/" >Nancy&#39;s Studio.</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">尝试使用express框架+MySQL实现数据接口并部署</a>
+                <a href="#" class="post-name">使用express+MySQL实现数据接口并部署</a>
             </div>
     </div>
     
@@ -242,7 +242,7 @@ height:50vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            尝试使用express框架+MySQL实现数据接口并部署
+            使用express+MySQL实现数据接口并部署
             <!-- 404 -->
             
         </h1>
@@ -271,7 +271,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>Word count: <span class="post-count">1,027</span> / Reading time: <span class="post-count">5 min</span></span>
+                        <span>Word count: <span class="post-count">1,032</span> / Reading time: <span class="post-count">5 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -434,11 +434,14 @@ height:50vh;
 <h3 id="安装Express并运行"><a href="#安装Express并运行" class="headerlink" title="安装Express并运行"></a>安装Express并运行</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo npm install express-generator -g</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span>创建web应用程序</span><br><span class="line">express express-app</span><br><span class="line">cd express-app</span><br><span class="line">npm install</span><br><span class="line"><span class="meta">#</span>测试并启动</span><br><span class="line">DEBUG=myapp:* npm start</span><br></pre></td></tr></table></figure>
 <p>可以在服务器的3000端口访问到这个express应用</p>
 <h3 id="安装pm2"><a href="#安装pm2" class="headerlink" title="安装pm2"></a>安装pm2</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo npm install pm2 -g</span><br><span class="line"></span><br><span class="line">cd ~/express-app/</span><br><span class="line"><span class="meta">#</span>使用pm2进程管理器运行express应用</span><br><span class="line">pm2 start ./bin/www</span><br></pre></td></tr></table></figure>
-<p>如图所示，express应用正在pm2中运行，名称为www，id为0</p>
-<p><img src="/2019/07/08/尝试使用express框架-MySQL实现数据接口并部署/express.jpg" alt=""></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>显示更多信息</span><br><span class="line">pm2 show www</span><br><span class="line"><span class="meta">#</span>查看日志</span><br><span class="line">pm2 logs www</span><br></pre></td></tr></table></figure>
+<p>如图所示，express应用正在pm2中运行，名称为www，id为0<img src="/2019/07/08/使用express-MySQL实现数据接口并部署/express.jpg" alt=""></p>
+<p>显示更多信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 show www</span><br></pre></td></tr></table></figure>
+<p>查看日志</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 logs www</span><br></pre></td></tr></table></figure>
 <p>设置开机自启</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pm2 startup systemd</span><br><span class="line">sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="https://linux.cn/article-8494-1.html" target="_blank" rel="noopener">这里是链接</a></p>
 
     </article>
     <!-- license  -->
@@ -674,10 +677,6 @@ top:50vh;
     
     
     
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 8
@@ -696,7 +695,7 @@ top:50vh;
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2019/07/08/尝试使用express框架-MySQL实现数据接口并部署/" >尝试使用express框架+MySQL实现数据接口并部署</a>
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2019/07/08/使用express-MySQL实现数据接口并部署/" >使用express+MySQL实现数据接口并部署</a>
         </li>
     
     
@@ -752,19 +751,19 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
     
-        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
-    
         <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
-    
-        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
-    
-        <span class="sidebar-tag-name" data-tags="数据结构与算法"><span class="iconfont-archer">&#xe606;</span>数据结构与算法</span>
     
         <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
     
         <span class="sidebar-tag-name" data-tags="Express"><span class="iconfont-archer">&#xe606;</span>Express</span>
     
         <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="数据结构与算法"><span class="iconfont-archer">&#xe606;</span>数据结构与算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
     
         <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
     
