@@ -267,7 +267,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>Word count: <span class="post-count">4,184</span> / Reading time: <span class="post-count">18 min</span></span>
+                        <span>Word count: <span class="post-count">4,191</span> / Reading time: <span class="post-count">18 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -561,12 +561,13 @@ height:50vh;
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123; type: 'FETCH_DATA_REQUEST' &#125;</span><br><span class="line">&#123; type: 'FETCH_DATA_SUCCESS', data: &#123;...&#125; &#125;</span><br><span class="line">&#123; type: 'FETCH_DATA_FAILURE', error: 'something wrong...' &#125;</span><br></pre></td></tr></table></figure>
 <p>定义一个异步action模拟向服务器请求数据：</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getData</span> (<span class="params">url</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">dispatch</span>) </span>&#123;</span><br><span class="line">        dispatch(&#123; <span class="attr">type</span>: <span class="string">'FETCH_DATA_REQUEST'</span> &#125;)</span><br><span class="line">        <span class="keyword">return</span> fetch (url) </span><br><span class="line">          .then(</span><br><span class="line">        	res =&gt; res.json(),</span><br><span class="line">            err =&gt; &#123;</span><br><span class="line">                <span class="built_in">console</span>.log(err)</span><br><span class="line">                dispatch(&#123; <span class="attr">type</span>: <span class="string">'FETCH_DATA_FAILURE'</span>, <span class="attr">error</span>: <span class="string">'something wrong...'</span> &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        )</span><br><span class="line">        .then(<span class="function"><span class="params">json</span> =&gt;</span></span><br><span class="line">        	dispatch(&#123;<span class="attr">type</span>: <span class="string">'FETCH_DATA_SUCCESS'</span>, <span class="attr">data</span>: json&#125;)</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">store.dispatch(getData(url));</span><br></pre></td></tr></table></figure>
+<p>异步数据流的处理</p>
 <p>像 <a href="https://github.com/gaearon/redux-thunk" target="_blank" rel="noopener">redux-thunk</a> 或 <a href="https://github.com/acdlite/redux-promise" target="_blank" rel="noopener">redux-promise</a> 这样支持异步的 middleware 都包装了 store 的 <code>dispatch()</code>方法，可以 dispatch 一些除了 action 以外的其他内容，例如：函数或者 Promise。使用的任何 middleware 都可以通过自己的方式解析 dispatch 的内容并继续传递 actions 给下一个 middleware。</p>
-<p>middleware 链中的最后一个中间件 dispatch 的 action 必须是一个普通对象。我们可以使用任意多异步的 middleware 去做想做的事情，但是需要使用普通对象作为最后一个被 dispatch 的 action ，来将处理流程带回同步方式。</p>
+<p>middleware 链中的<strong>最后一个中间件 dispatch 的 action 必须是一个普通对象</strong>。我们可以使用任意多异步的 middleware 去做想做的事情，但是需要使用普通对象作为最后一个被 dispatch 的 action ，来将处理流程带回同步方式。</p>
 <h2 id="参考及学习资料"><a href="#参考及学习资料" class="headerlink" title="参考及学习资料"></a>参考及学习资料</h2><ol>
 <li>《React进阶之路》—— 徐超</li>
 <li>《深入React技术栈》—— 陈屹</li>
-<li><a href="https://github.com/brickspert/blog/issues/22" target="_blank" rel="noopener">https://github.com/brickspert/blog/issues/22</a> （强力推荐！通俗易懂）</li>
+<li><a href="https://github.com/brickspert/blog/issues/22" target="_blank" rel="noopener">https://github.com/brickspert/blog/issues/22</a>  通俗易懂的好文</li>
 <li><a href="http://cn.redux.js.org" target="_blank" rel="noopener">http://cn.redux.js.org</a>  Redux中文文档</li>
 </ol>
 
@@ -827,6 +828,8 @@ top:50vh;
     
     
     
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 9
@@ -902,19 +905,19 @@ top:50vh;
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
-        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
     
         <span class="sidebar-tag-name" data-tags="SQL"><span class="iconfont-archer">&#xe606;</span>SQL</span>
     
         <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
     
         <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
     
         <span class="sidebar-tag-name" data-tags="Express"><span class="iconfont-archer">&#xe606;</span>Express</span>
     
         <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
-    
-        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
     
         <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
     
