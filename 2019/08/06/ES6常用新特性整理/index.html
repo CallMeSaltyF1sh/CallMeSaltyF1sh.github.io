@@ -269,7 +269,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>Word count: <span class="post-count">5,521</span> / Reading time: <span class="post-count">23 min</span></span>
+                        <span>Word count: <span class="post-count">5,693</span> / Reading time: <span class="post-count">24 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -593,6 +593,12 @@ height:50vh;
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = [<span class="number">1</span>, [[<span class="number">2</span>, <span class="number">3</span>], <span class="number">4</span>], [<span class="number">5</span>, <span class="number">6</span>]];</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> flat = <span class="function"><span class="keyword">function</span>* (<span class="params">a</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> length = a.length;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">    <span class="keyword">var</span> item = a[i];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> item !== <span class="string">'number'</span>) &#123;</span><br><span class="line">      <span class="keyword">yield</span>* flat(item);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">yield</span> item;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> f <span class="keyword">of</span> flat(arr)) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(f);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 1, 2, 3, 4, 5, 6</span></span><br></pre></td></tr></table></figure>
 <p>与Iterator接口的关系：</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myIterable = &#123;&#125;;</span><br><span class="line">myIterable[<span class="built_in">Symbol</span>.iterator] = <span class="function"><span class="keyword">function</span>* (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">yield</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">yield</span> <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">yield</span> <span class="number">3</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">[...myIterable] <span class="comment">// [1, 2, 3]</span></span><br></pre></td></tr></table></figure>
+<p>利用 Generator 函数，可以在任意对象上部署 Iterator 接口。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">iterEntries</span>(<span class="params">obj</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> keys = <span class="built_in">Object</span>.keys(obj);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i=<span class="number">0</span>; i &lt; keys.length; i++) &#123;</span><br><span class="line">    <span class="keyword">let</span> key = keys[i];</span><br><span class="line">    <span class="keyword">yield</span> [key, obj[key]];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> myObj = &#123; <span class="attr">foo</span>: <span class="number">3</span>, <span class="attr">bar</span>: <span class="number">7</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> [key, value] <span class="keyword">of</span> iterEntries(myObj)) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(key, value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// foo 3</span></span><br><span class="line"><span class="comment">// bar 7</span></span><br></pre></td></tr></table></figure>
+<p>Generator 函数和<code>for...of</code>循环，实现斐波那契数列的例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">fibonacci</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> [prev, curr] = [<span class="number">0</span>, <span class="number">1</span>];</span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    <span class="keyword">yield</span> curr;</span><br><span class="line">    [prev, curr] = [curr, prev + curr];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> n <span class="keyword">of</span> fibonacci()) &#123;</span><br><span class="line">  <span class="keyword">if</span> (n &gt; <span class="number">1000</span>) <span class="keyword">break</span>;</span><br><span class="line">  <span class="built_in">console</span>.log(n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>yield*</code>表达式用来在一个 Generator 函数里面执行另一个 Generator 函数。 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">bar</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">yield</span> <span class="string">'x'</span>;</span><br><span class="line">  <span class="keyword">yield</span>* foo();</span><br><span class="line">  <span class="keyword">yield</span> <span class="string">'y'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
     </article>
     <!-- license  -->
@@ -868,6 +874,12 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 10
@@ -952,13 +964,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
     
-        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
-    
         <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
     
-        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
-    
-        <span class="sidebar-tag-name" data-tags="数据结构与算法"><span class="iconfont-archer">&#xe606;</span>数据结构与算法</span>
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
     
         <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
     
@@ -966,11 +974,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
     
-        <span class="sidebar-tag-name" data-tags="ES6"><span class="iconfont-archer">&#xe606;</span>ES6</span>
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="数据结构与算法"><span class="iconfont-archer">&#xe606;</span>数据结构与算法</span>
     
         <span class="sidebar-tag-name" data-tags="Redux"><span class="iconfont-archer">&#xe606;</span>Redux</span>
     
         <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ES6"><span class="iconfont-archer">&#xe606;</span>ES6</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
