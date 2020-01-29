@@ -476,7 +476,7 @@ height:50vh;
 <h2 id="表单"><a href="#表单" class="headerlink" title="表单"></a>表单</h2><h3 id="受控组件"><a href="#受控组件" class="headerlink" title="受控组件"></a>受控组件</h3><p>受控组件中的表单数据由React组件管理，使 React 的 state 成为“唯一数据源”，大多数情况下都使用受控组件来处理表单数据。</p>
 <h3 id="非受控组件"><a href="#非受控组件" class="headerlink" title="非受控组件"></a>非受控组件</h3><p>非受控组件中的数据交由DOM节点处理，使用ref从DOM节点中获取表单数据，可以指定defaultValue属性赋予组件初始值。</p>
 <p><code>&lt;input type=&#39;file&#39; /&gt;</code> 始终是一个非受控组件，因为它的值只能由用户设置，而不能通过代码控制。（附：<a href="https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications" target="_blank" rel="noopener">DOM File API文档</a> ）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">class FileInput extends React.Component &#123;</span><br><span class="line">  constructor(props) &#123;</span><br><span class="line">    super(props);</span><br><span class="line">    this.handleSubmit = this.handleSubmit.bind(this);</span><br><span class="line">    this.fileInput = React.createRef();</span><br><span class="line">  &#125;</span><br><span class="line">  handleSubmit(event) &#123;</span><br><span class="line">    event.preventDefault();</span><br><span class="line">    alert(</span><br><span class="line">      `Selected file - $&#123;</span><br><span class="line">        this.fileInput.current.files[0].name</span><br><span class="line">      &#125;`</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;form onSubmit=&#123;this.handleSubmit&#125;&gt;</span><br><span class="line">        &lt;label&gt;</span><br><span class="line">          Upload file:</span><br><span class="line">          &lt;input type=&quot;file&quot; ref=&#123;this.fileInput&#125; /&gt;</span><br><span class="line">        &lt;/label&gt;</span><br><span class="line">        &lt;br /&gt;</span><br><span class="line">        &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;</span><br><span class="line">      &lt;/form&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileInput</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">    <span class="keyword">super</span>(props);</span><br><span class="line">    <span class="keyword">this</span>.handleSubmit = <span class="keyword">this</span>.handleSubmit.bind(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.fileInput = React.createRef();</span><br><span class="line">  &#125;</span><br><span class="line">  handleSubmit(event) &#123;</span><br><span class="line">    event.preventDefault();</span><br><span class="line">    alert(</span><br><span class="line">      <span class="string">`Selected file - <span class="subst">$&#123;</span></span></span><br><span class="line"><span class="string"><span class="subst">        <span class="keyword">this</span>.fileInput.current.files[<span class="number">0</span>].name</span></span></span><br><span class="line"><span class="string"><span class="subst">      &#125;</span>`</span></span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;form onSubmit=&#123;<span class="keyword">this</span>.handleSubmit&#125;&gt;</span><br><span class="line">        &lt;label&gt;</span><br><span class="line">          Upload file:</span><br><span class="line">          &lt;input type=<span class="string">"file"</span> ref=&#123;<span class="keyword">this</span>.fileInput&#125; /&gt;</span><br><span class="line">        &lt;<span class="regexp">/label&gt;</span></span><br><span class="line"><span class="regexp">        &lt;br /</span>&gt;</span><br><span class="line">        &lt;button type=<span class="string">"submit"</span>&gt;Submit&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>form&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>由于非受控组件将真实数据存储在DOM节点中，所以在使用非受控组件时，有时候反而更容易同时集成 React 和非 React 代码。 如果表单数据比较简单可能适合使用非受控的方式，但大多数情况下还是使用受控组件。</p>
 <p>关于受控和非受控组件的适用场景，参考这篇文章：<a href="https://goshakkk.name/controlled-vs-uncontrolled-inputs-react/" target="_blank" rel="noopener">链接</a></p>
 <h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><h3 id="basic"><a href="#basic" class="headerlink" title="basic"></a>basic</h3><p>当组件树中不同层级的组件需要访问相同的数据时，Context 能将这些数据向组件树下所有的组件进行“广播”，让所有的组件都能访问到这些数据以及后续的数据更新，适用于全局共享的属性。 </p>
@@ -531,11 +531,11 @@ height:50vh;
 <p>当递归DOM节点的子元素时，React会同时遍历两个子元素的列表；若出现差异，则生成一个mutation。通常为子元素添加key值提升性能。</p>
 <h2 id="Hook"><a href="#Hook" class="headerlink" title="Hook"></a>Hook</h2><p>使用 Hook 可以在不编写 class 的情况下使用 state 以及其他 React 特性；可以很方便地在无需修改组件结构的情况下复用状态逻辑；还可以将组件中相互关联的部分拆分成更小的函数。</p>
 <h3 id="生命周期方法对应Hook"><a href="#生命周期方法对应Hook" class="headerlink" title="生命周期方法对应Hook"></a>生命周期方法对应Hook</h3><ul>
-<li><code>constructor</code>：函数组件不需要构造函数。可以通过调用 <code>useState</code> 初始化 state。若计算的代价比较昂贵，可以传一个函数给 <code>useState</code>。</li>
-<li><code>getDerivedStateFromProps</code>：改为渲染时安排一次更新</li>
-<li><code>shouldComponentUpdate</code>： <code>React.memo</code></li>
-<li><code>render</code>：函数组件体本身</li>
-<li><code>componentDidMount</code>, <code>componentDidUpdate</code>, <code>componentWillUnmount</code>：<code>useEffect</code> </li>
+<li>constructor：函数组件不需要构造函数。可以通过调用 <code>useState</code> 初始化 state。若计算的代价比较昂贵，可以传一个函数给 <code>useState</code>。</li>
+<li>getDerivedStateFromProps：改为渲染时安排一次更新</li>
+<li>shouldComponentUpdate： <code>React.memo</code></li>
+<li>render：函数组件体本身</li>
+<li>componentDidMount, componentDidUpdate, componentWillUnmount：<code>useEffect</code> </li>
 </ul>
 <h3 id="基础内置Hook"><a href="#基础内置Hook" class="headerlink" title="基础内置Hook"></a>基础内置Hook</h3><h4 id="State-Hook-useState"><a href="#State-Hook-useState" class="headerlink" title="State Hook - useState"></a>State Hook - useState</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> [state, setState] = useState(initialState);</span><br><span class="line">setState(newState);</span><br></pre></td></tr></table></figure>
 <p>在函数组件中存储内部state（保存在函数作用域中）。在使用useState定义state时返回一个有两个值的数组，可以直接通过数组解构进行赋值；state hook在更新state时直接替换掉原来的state而不是合并。</p>
@@ -580,11 +580,11 @@ height:50vh;
 <p>引用<fancyinput ref="{inputRef}">的父组件可以获取到<code>inputRef.current</code>。</fancyinput></p>
 <h3 id="自定义Hook"><a href="#自定义Hook" class="headerlink" title="自定义Hook"></a>自定义Hook</h3><p>即定义名称以”use”开头的函数，其内部可调用其他Hook，自定义参数和返回值。</p>
 <p>例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import React, &#123; useState, useEffect &#125; from &apos;react&apos;;</span><br><span class="line"></span><br><span class="line">function useFriendStatus(friendID) &#123;</span><br><span class="line">  const [isOnline, setIsOnline] = useState(null);</span><br><span class="line"></span><br><span class="line">  useEffect(() =&gt; &#123;</span><br><span class="line">    function handleStatusChange(status) &#123;</span><br><span class="line">      setIsOnline(status.isOnline);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);</span><br><span class="line">    return () =&gt; &#123;</span><br><span class="line">      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  return isOnline;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; useState, useEffect &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useFriendStatus</span>(<span class="params">friendID</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [isOnline, setIsOnline] = useState(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">  useEffect(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">handleStatusChange</span>(<span class="params">status</span>) </span>&#123;</span><br><span class="line">      setIsOnline(status.isOnline);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> isOnline;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>使用上面自定义的Hook</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">function FriendStatus(props) &#123;</span><br><span class="line">  const isOnline = useFriendStatus(props.friend.id);</span><br><span class="line"></span><br><span class="line">  if (isOnline === null) &#123;</span><br><span class="line">    return &apos;Loading...&apos;;</span><br><span class="line">  &#125;</span><br><span class="line">  return isOnline ? &apos;Online&apos; : &apos;Offline&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">FriendStatus</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> isOnline = useFriendStatus(props.friend.id);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (isOnline === <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'Loading...'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> isOnline ? <span class="string">'Online'</span> : <span class="string">'Offline'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>实现一个useReducer的简化版本：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">function useReducer(reducer, initialState) &#123;</span><br><span class="line">  const [state, setState] = useState(initialState);</span><br><span class="line"></span><br><span class="line">  function dispatch(action) &#123;</span><br><span class="line">    const nextState = reducer(state, action);</span><br><span class="line">    setState(nextState);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return [state, dispatch];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useReducer</span>(<span class="params">reducer, initialState</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [state, setState] = useState(initialState);</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span>(<span class="params">action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> nextState = reducer(state, action);</span><br><span class="line">    setState(nextState);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> [state, dispatch];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
     </article>
     <!-- license  -->
@@ -592,6 +592,11 @@ height:50vh;
     <!-- paginator  -->
     <ul class="post-paginator">
         <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2020/01/29/React源码阅读/" title= React源码阅读 >
+                    <div class="nextTitle">React源码阅读</div>
+                </a>
             
         </li>
         <li class="previous">
@@ -817,9 +822,48 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 11
+        Total : 12
         </div>
         <!-- search  -->
         
@@ -832,6 +876,11 @@ top:50vh;
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/2020/01/29/React源码阅读/" >React源码阅读</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -929,13 +978,13 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="数据结构与算法"><span class="iconfont-archer">&#xe606;</span>数据结构与算法</span>
     
+        <span class="sidebar-tag-name" data-tags="React"><span class="iconfont-archer">&#xe606;</span>React</span>
+    
         <span class="sidebar-tag-name" data-tags="Redux"><span class="iconfont-archer">&#xe606;</span>Redux</span>
     
         <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
     
         <span class="sidebar-tag-name" data-tags="ES6"><span class="iconfont-archer">&#xe606;</span>ES6</span>
-    
-        <span class="sidebar-tag-name" data-tags="React"><span class="iconfont-archer">&#xe606;</span>React</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

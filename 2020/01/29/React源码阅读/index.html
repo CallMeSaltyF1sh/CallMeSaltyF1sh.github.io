@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="John Doe">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="John Doe">
+    <meta name="keywords" content="Hexo | John Doe">
+    <meta name="description" content="">
+    <meta name="Cache-Control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>React源码阅读 · Nancy&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= /css/style.css?v=20180721 as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= /css/mobile.css?v=20180721 media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/pic1.jpg" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Nancy&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">React源码阅读</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Nancy's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            React源码阅读
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "React">React</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count">2,477</span> / Reading time: <span class="post-count">15 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/01/29</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h1 id="react包"><a href="#react包" class="headerlink" title="react包"></a>react包</h1><p>截取出一些主要模块的部分代码。</p>
+<h2 id="Component和PureComponent"><a href="#Component和PureComponent" class="headerlink" title="Component和PureComponent"></a>Component和PureComponent</h2><p>Component</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Base class helpers for the updating state of a component.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Component</span>(<span class="params">props, context, updater</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.props = props;</span><br><span class="line">  <span class="keyword">this</span>.context = context;</span><br><span class="line">  <span class="comment">// If a component has string refs, we will assign a different object later.</span></span><br><span class="line">  <span class="keyword">this</span>.refs = emptyObject;</span><br><span class="line">  <span class="comment">// We initialize the default updater but the real one gets injected by the renderer.</span></span><br><span class="line">  <span class="keyword">this</span>.updater = updater || ReactNoopUpdateQueue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ReactNoopUpdateQueue</code> updater更新队列抽象API</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * This is the abstract API for an update queue.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> ReactNoopUpdateQueue = &#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Checks whether or not this composite component is mounted.</span></span><br><span class="line"><span class="comment">   * @param &#123;ReactClass&#125; publicInstance The instance we want to test.</span></span><br><span class="line"><span class="comment">   * @return &#123;boolean&#125; True if mounted, false otherwise.</span></span><br><span class="line"><span class="comment">   * @protected</span></span><br><span class="line"><span class="comment">   * @final</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  isMounted: <span class="function"><span class="keyword">function</span>(<span class="params">publicInstance</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Forces an update. This should only be invoked when it is known with</span></span><br><span class="line"><span class="comment">   * certainty that we are **not** in a DOM transaction.</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * You may want to call this when you know that some deeper aspect of the</span></span><br><span class="line"><span class="comment">   * component's state has changed but `setState` was not called.</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * @param &#123;ReactClass&#125; publicInstance The instance that should rerender.</span></span><br><span class="line"><span class="comment">   * @param &#123;?function&#125; callback Called after component is updated.</span></span><br><span class="line"><span class="comment">   * @param &#123;?string&#125; callerName name of the calling function in the public API.</span></span><br><span class="line"><span class="comment">   * @internal</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  enqueueForceUpdate: <span class="function"><span class="keyword">function</span>(<span class="params">publicInstance, callback, callerName</span>) </span>&#123;</span><br><span class="line">    warnNoop(publicInstance, <span class="string">'forceUpdate'</span>);   <span class="comment">//用于检查实例是否isMounted</span></span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Replaces all of the state. Always use this or `setState` to mutate state.</span></span><br><span class="line"><span class="comment">   * You should treat `this.state` as immutable.</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * There is no guarantee that `this.state` will be immediately updated, so</span></span><br><span class="line"><span class="comment">   * accessing `this.state` after calling this method may return the old value.</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * @param &#123;ReactClass&#125; publicInstance The instance that should rerender.</span></span><br><span class="line"><span class="comment">   * @param &#123;object&#125; completeState Next state.</span></span><br><span class="line"><span class="comment">   * @param &#123;?function&#125; callback Called after component is updated.</span></span><br><span class="line"><span class="comment">   * @param &#123;?string&#125; callerName name of the calling function in the public API.</span></span><br><span class="line"><span class="comment">   * @internal</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  enqueueReplaceState: <span class="function"><span class="keyword">function</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">    publicInstance,</span></span></span><br><span class="line"><span class="function"><span class="params">    completeState,</span></span></span><br><span class="line"><span class="function"><span class="params">    callback,</span></span></span><br><span class="line"><span class="function"><span class="params">    callerName,</span></span></span><br><span class="line"><span class="function"><span class="params">  </span>) </span>&#123;</span><br><span class="line">    warnNoop(publicInstance, <span class="string">'replaceState'</span>);</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Sets a subset of the state. This only exists because _pendingState is</span></span><br><span class="line"><span class="comment">   * internal. This provides a merging strategy that is not available to deep</span></span><br><span class="line"><span class="comment">   * properties which is confusing. <span class="doctag">TODO:</span> Expose pendingState or don't use it</span></span><br><span class="line"><span class="comment">   * during the merge.</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * @param &#123;ReactClass&#125; publicInstance The instance that should rerender.</span></span><br><span class="line"><span class="comment">   * @param &#123;object&#125; partialState Next partial state to be merged with state.</span></span><br><span class="line"><span class="comment">   * @param &#123;?function&#125; callback Called after component is updated.</span></span><br><span class="line"><span class="comment">   * @param &#123;?string&#125; Name of the calling function in the public API.</span></span><br><span class="line"><span class="comment">   * @internal</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  enqueueSetState: <span class="function"><span class="keyword">function</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">    publicInstance,</span></span></span><br><span class="line"><span class="function"><span class="params">    partialState,</span></span></span><br><span class="line"><span class="function"><span class="params">    callback,</span></span></span><br><span class="line"><span class="function"><span class="params">    callerName,</span></span></span><br><span class="line"><span class="function"><span class="params">  </span>) </span>&#123;</span><br><span class="line">    warnNoop(publicInstance, <span class="string">'setState'</span>);  </span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>setState方法</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @param &#123;object|function&#125; partialState Next partial state or function to</span></span><br><span class="line"><span class="comment"> * 	      produce next partial state to be merged with current state.</span></span><br><span class="line"><span class="comment"> * @param &#123;?function&#125; callback Called after state is updated.</span></span><br><span class="line"><span class="comment"> * @final</span></span><br><span class="line"><span class="comment"> * @protected</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Component.prototype.setState = <span class="function"><span class="keyword">function</span>(<span class="params">partialState, callback</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 控制传入的partialState类型</span></span><br><span class="line">  invariant(</span><br><span class="line">    <span class="keyword">typeof</span> partialState === <span class="string">'object'</span> ||</span><br><span class="line">      <span class="keyword">typeof</span> partialState === <span class="string">'function'</span> ||</span><br><span class="line">      partialState == <span class="literal">null</span>,</span><br><span class="line">    <span class="string">'setState(...): takes an object of state variables to update or a '</span> +</span><br><span class="line">      <span class="string">'function which returns an object of state variables.'</span>,</span><br><span class="line">  );</span><br><span class="line">  <span class="keyword">this</span>.updater.enqueueSetState(<span class="keyword">this</span>, partialState, callback, <span class="string">'setState'</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>forceUpdate方法：强制setState某些已改变的深层state值，这样做shouldComponentUpdate不会被调用，componentWillUpdate和componentDidUpdate将被调用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @param &#123;?function&#125; callback Called after update is complete.</span></span><br><span class="line"><span class="comment"> * @final</span></span><br><span class="line"><span class="comment"> * @protected</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Component.prototype.forceUpdate = <span class="function"><span class="keyword">function</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.updater.enqueueForceUpdate(<span class="keyword">this</span>, callback, <span class="string">'forceUpdate'</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>PureComponent</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Convenience component with default shallow equality check for sCU.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PureComponent</span>(<span class="params">props, context, updater</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.props = props;</span><br><span class="line">  <span class="keyword">this</span>.context = context;</span><br><span class="line">  <span class="comment">// If a component has string refs, we will assign a different object later.</span></span><br><span class="line">  <span class="keyword">this</span>.refs = emptyObject;</span><br><span class="line">  <span class="keyword">this</span>.updater = updater || ReactNoopUpdateQueue;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ComponentDummy</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line">ComponentDummy.prototype = Component.prototype;</span><br><span class="line"><span class="keyword">const</span> pureComponentPrototype = (PureComponent.prototype = <span class="keyword">new</span> ComponentDummy());</span><br><span class="line">pureComponentPrototype.constructor = PureComponent;</span><br><span class="line"><span class="comment">// Avoid an extra prototype jump for these methods.</span></span><br><span class="line"><span class="built_in">Object</span>.assign(pureComponentPrototype, Component.prototype);  <span class="comment">// 避免向上查找原型链</span></span><br><span class="line">pureComponentPrototype.isPureReactComponent = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="ReactElement"><a href="#ReactElement" class="headerlink" title="ReactElement"></a>ReactElement</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; type</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; props</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; key</span></span><br><span class="line"><span class="comment"> * @param &#123;string|object&#125; ref</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; owner</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; self</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; source</span></span><br><span class="line"><span class="comment"> * @internal</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> ReactElement = <span class="function"><span class="keyword">function</span>(<span class="params">type, key, ref, self, source, owner, props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> element = &#123;</span><br><span class="line">    <span class="comment">// This tag allows us to uniquely identify this as a React Element</span></span><br><span class="line">    $$<span class="keyword">typeof</span>: REACT_ELEMENT_TYPE,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Built-in properties that belong on the element</span></span><br><span class="line">    type: type,</span><br><span class="line">    key: key,</span><br><span class="line">    ref: ref,</span><br><span class="line">    props: props,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Record the component responsible for creating this element.</span></span><br><span class="line">    _owner: owner,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">    element._store = &#123;&#125;;  <span class="comment">// backup</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(element._store, <span class="string">'validated'</span>, &#123;</span><br><span class="line">      configurable: <span class="literal">false</span>,</span><br><span class="line">      enumerable: <span class="literal">false</span>,</span><br><span class="line">      writable: <span class="literal">true</span>,</span><br><span class="line">      value: <span class="literal">false</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// self and source are DEV only properties.</span></span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(element, <span class="string">'_self'</span>, &#123;</span><br><span class="line">      configurable: <span class="literal">false</span>,</span><br><span class="line">      enumerable: <span class="literal">false</span>,</span><br><span class="line">      writable: <span class="literal">false</span>,</span><br><span class="line">      value: self,</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// Two elements created in two different places should be considered</span></span><br><span class="line">    <span class="comment">// equal for testing purposes and therefore we hide it from enumeration.</span></span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(element, <span class="string">'_source'</span>, &#123;</span><br><span class="line">      configurable: <span class="literal">false</span>,</span><br><span class="line">      enumerable: <span class="literal">false</span>,</span><br><span class="line">      writable: <span class="literal">false</span>,</span><br><span class="line">      value: source,</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">Object</span>.freeze) &#123;</span><br><span class="line">      <span class="built_in">Object</span>.freeze(element.props);</span><br><span class="line">      <span class="built_in">Object</span>.freeze(element);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> element;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>createElement</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> hasOwnProperty = <span class="built_in">Object</span>.prototype.hasOwnProperty;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保留属性</span></span><br><span class="line"><span class="keyword">const</span> RESERVED_PROPS = &#123;</span><br><span class="line">  key: <span class="literal">true</span>,</span><br><span class="line">  ref: <span class="literal">true</span>,</span><br><span class="line">  __self: <span class="literal">true</span>,</span><br><span class="line">  __source: <span class="literal">true</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">createElement</span>(<span class="params">type, config, children</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> propName;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Reserved names are extracted</span></span><br><span class="line">  <span class="keyword">const</span> props = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> key = <span class="literal">null</span>;</span><br><span class="line">  <span class="keyword">let</span> ref = <span class="literal">null</span>;</span><br><span class="line">  <span class="keyword">let</span> self = <span class="literal">null</span>;</span><br><span class="line">  <span class="keyword">let</span> source = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (config != <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 取ref属性</span></span><br><span class="line">    <span class="keyword">if</span> (hasValidRef(config)) &#123;</span><br><span class="line">      ref = config.ref;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">        warnIfStringRefCannotBeAutoConverted(config);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 取key属性</span></span><br><span class="line">    <span class="keyword">if</span> (hasValidKey(config)) &#123;</span><br><span class="line">      key = <span class="string">''</span> + config.key;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    self = config.__self === <span class="literal">undefined</span> ? <span class="literal">null</span> : config.__self;</span><br><span class="line">    source = config.__source === <span class="literal">undefined</span> ? <span class="literal">null</span> : config.__source;</span><br><span class="line">    <span class="comment">// 其他属性加到props</span></span><br><span class="line">    <span class="keyword">for</span> (propName <span class="keyword">in</span> config) &#123;</span><br><span class="line">      <span class="keyword">if</span> (</span><br><span class="line">        hasOwnProperty.call(config, propName) &amp;&amp;</span><br><span class="line">        !RESERVED_PROPS.hasOwnProperty(propName)</span><br><span class="line">      ) &#123;</span><br><span class="line">        props[propName] = config[propName];</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Children can be more than one argument, and those are transferred onto</span></span><br><span class="line">  <span class="comment">// the newly allocated props object.</span></span><br><span class="line">  <span class="keyword">const</span> childrenLength = <span class="built_in">arguments</span>.length - <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">if</span> (childrenLength === <span class="number">1</span>) &#123;</span><br><span class="line">    props.children = children;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childrenLength &gt; <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> childArray = <span class="built_in">Array</span>(childrenLength);</span><br><span class="line">    <span class="comment">// 把第三个及以后的参数都加到childArray</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; childrenLength; i++) &#123;</span><br><span class="line">      childArray[i] = <span class="built_in">arguments</span>[i + <span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">Object</span>.freeze) &#123;</span><br><span class="line">        <span class="built_in">Object</span>.freeze(childArray);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    props.children = childArray;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 给没定义值的属性添加默认值</span></span><br><span class="line">  <span class="keyword">if</span> (type &amp;&amp; type.defaultProps) &#123;</span><br><span class="line">    <span class="keyword">const</span> defaultProps = type.defaultProps;</span><br><span class="line">    <span class="keyword">for</span> (propName <span class="keyword">in</span> defaultProps) &#123;</span><br><span class="line">      <span class="keyword">if</span> (props[propName] === <span class="literal">undefined</span>) &#123;</span><br><span class="line">        props[propName] = defaultProps[propName];</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">    <span class="keyword">if</span> (key || ref) &#123;</span><br><span class="line">      <span class="keyword">const</span> displayName =</span><br><span class="line">        <span class="keyword">typeof</span> type === <span class="string">'function'</span></span><br><span class="line">          ? type.displayName || type.name || <span class="string">'Unknown'</span></span><br><span class="line">          : type;</span><br><span class="line">      <span class="keyword">if</span> (key) &#123;</span><br><span class="line">        defineKeyPropWarningGetter(props, displayName);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (ref) &#123;</span><br><span class="line">        defineRefPropWarningGetter(props, displayName);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> ReactElement(</span><br><span class="line">    type,</span><br><span class="line">    key,</span><br><span class="line">    ref,</span><br><span class="line">    self,</span><br><span class="line">    source,</span><br><span class="line">    ReactCurrentOwner.current,</span><br><span class="line">    props,</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>cloneElement</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Clone and return a new ReactElement using element as the starting point.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">cloneElement</span>(<span class="params">element, config, children</span>) </span>&#123;</span><br><span class="line">  invariant(</span><br><span class="line">    !(element === <span class="literal">null</span> || element === <span class="literal">undefined</span>),</span><br><span class="line">    <span class="string">'React.cloneElement(...): The argument must be a React element, but you passed %s.'</span>,</span><br><span class="line">    element,</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> propName;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Original props are copied</span></span><br><span class="line">  <span class="keyword">const</span> props = <span class="built_in">Object</span>.assign(&#123;&#125;, element.props);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Reserved names are extracted</span></span><br><span class="line">  <span class="keyword">let</span> key = element.key;</span><br><span class="line">  <span class="keyword">let</span> ref = element.ref;</span><br><span class="line">  <span class="comment">// Self is preserved since the owner is preserved.</span></span><br><span class="line">  <span class="keyword">const</span> self = element._self;</span><br><span class="line">  <span class="comment">// Source is preserved since cloneElement is unlikely to be targeted by a</span></span><br><span class="line">  <span class="comment">// transpiler, and the original source is probably a better indicator of the</span></span><br><span class="line">  <span class="comment">// true owner.</span></span><br><span class="line">  <span class="keyword">const</span> source = element._source;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Owner will be preserved, unless ref is overridden</span></span><br><span class="line">  <span class="keyword">let</span> owner = element._owner;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (config != <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (hasValidRef(config)) &#123;</span><br><span class="line">      <span class="comment">// Silently steal the ref from the parent.</span></span><br><span class="line">      ref = config.ref;</span><br><span class="line">      owner = ReactCurrentOwner.current;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (hasValidKey(config)) &#123;</span><br><span class="line">      key = <span class="string">''</span> + config.key;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Remaining properties override existing props</span></span><br><span class="line">    <span class="keyword">let</span> defaultProps;</span><br><span class="line">    <span class="keyword">if</span> (element.type &amp;&amp; element.type.defaultProps) &#123;</span><br><span class="line">      defaultProps = element.type.defaultProps;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (propName <span class="keyword">in</span> config) &#123;</span><br><span class="line">      <span class="keyword">if</span> (</span><br><span class="line">        hasOwnProperty.call(config, propName) &amp;&amp;</span><br><span class="line">        !RESERVED_PROPS.hasOwnProperty(propName)</span><br><span class="line">      ) &#123;</span><br><span class="line">        <span class="keyword">if</span> (config[propName] === <span class="literal">undefined</span> &amp;&amp; defaultProps !== <span class="literal">undefined</span>) &#123;</span><br><span class="line">          <span class="comment">// Resolve default props</span></span><br><span class="line">          props[propName] = defaultProps[propName];</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          props[propName] = config[propName];</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> childrenLength = <span class="built_in">arguments</span>.length - <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">if</span> (childrenLength === <span class="number">1</span>) &#123;</span><br><span class="line">    props.children = children;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childrenLength &gt; <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> childArray = <span class="built_in">Array</span>(childrenLength);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; childrenLength; i++) &#123;</span><br><span class="line">      childArray[i] = <span class="built_in">arguments</span>[i + <span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    props.children = childArray;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ReactElement(element.type, key, ref, self, source, owner, props);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Verify ReactElement</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @param &#123;?object&#125; object</span></span><br><span class="line"><span class="comment"> * @return &#123;boolean&#125; True if `object` is a ReactElement.</span></span><br><span class="line"><span class="comment"> * @final</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">isValidElement</span>(<span class="params">object</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="keyword">typeof</span> object === <span class="string">'object'</span> &amp;&amp;</span><br><span class="line">    object !== <span class="literal">null</span> &amp;&amp;</span><br><span class="line">    object.$$<span class="keyword">typeof</span> === REACT_ELEMENT_TYPE</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="ReactContext"><a href="#ReactContext" class="headerlink" title="ReactContext"></a>ReactContext</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> ReactProviderType&lt;T&gt; = &#123;</span><br><span class="line">  $$<span class="keyword">typeof</span>: Symbol | <span class="built_in">number</span>,</span><br><span class="line">  _context: ReactContext&lt;T&gt;,</span><br><span class="line">  ...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> ReactContext&lt;T&gt; = &#123;</span><br><span class="line">  $$<span class="keyword">typeof</span>: Symbol | <span class="built_in">number</span>,</span><br><span class="line">  Consumer: ReactContext&lt;T&gt;,</span><br><span class="line">  Provider: ReactProviderType&lt;T&gt;,</span><br><span class="line">  _calculateChangedBits: <span class="function">(<span class="params">(<span class="params">a: T, b: T</span>) =&gt; <span class="built_in">number</span></span>) | <span class="params">null</span>,</span></span><br><span class="line"><span class="function">  _<span class="params">currentValue</span>: <span class="params">T</span>,</span></span><br><span class="line"><span class="function">  _<span class="params">currentValue2</span>: <span class="params">T</span>,</span></span><br><span class="line"><span class="function">  _<span class="params">threadCount</span>: <span class="params">number</span>,</span></span><br><span class="line"><span class="function">  // <span class="params">DEV</span> <span class="params">only</span></span></span><br><span class="line"><span class="function">  _<span class="params">currentRenderer</span>?: <span class="params">Object</span> | <span class="params">null</span>,</span></span><br><span class="line"><span class="function">  _<span class="params">currentRenderer2</span>?: <span class="params">Object</span> | <span class="params">null</span>,</span></span><br><span class="line"><span class="function">  ...</span></span><br><span class="line"><span class="function">&#125;;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="params">export</span> <span class="params">function</span> <span class="params">createContext</span>&lt;<span class="params">T</span>&gt;(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">  defaultValue: T,</span></span></span><br><span class="line"><span class="function"><span class="params">  calculateChangedBits: ?(<span class="params">a: T, b: T</span>) =&gt; <span class="built_in">number</span>,</span></span></span><br><span class="line"><span class="function"><span class="params"></span>): <span class="params">ReactContext</span>&lt;<span class="params">T</span>&gt; &#123;</span></span><br><span class="line"><span class="function">  <span class="params">if</span> (<span class="params">calculateChangedBits === <span class="literal">undefined</span></span>) &#123;</span></span><br><span class="line"><span class="function">    <span class="params">calculateChangedBits</span> = <span class="params">null</span>;</span></span><br><span class="line"><span class="function">  &#125; <span class="params">else</span> &#123;</span></span><br><span class="line"><span class="function">    <span class="params">if</span> (<span class="params">__DEV__</span>) &#123;</span></span><br><span class="line"><span class="function">      <span class="params">if</span> (<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">        calculateChangedBits !== <span class="literal">null</span> &amp;&amp;</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">typeof</span> calculateChangedBits !== '<span class="keyword">function</span>'</span></span></span><br><span class="line"><span class="function"><span class="params">      </span>) &#123;</span></span><br><span class="line"><span class="function">        <span class="params">console</span>.<span class="params">error</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">          'createContext: Expected the optional second argument to be a ' +</span></span></span><br><span class="line"><span class="function"><span class="params">            '<span class="keyword">function</span>. Instead received: %s',</span></span></span><br><span class="line"><span class="function"><span class="params">          calculateChangedBits,</span></span></span><br><span class="line"><span class="function"><span class="params">        </span>);</span></span><br><span class="line"><span class="function">      &#125;</span></span><br><span class="line"><span class="function">    &#125;</span></span><br><span class="line"><span class="function">  &#125;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  <span class="params">const</span> <span class="params">context</span>: <span class="params">ReactContext</span>&lt;<span class="params">T</span>&gt; = &#123;</span></span><br><span class="line"><span class="function">    $$<span class="params">typeof</span>: <span class="params">REACT_CONTEXT_TYPE</span>,</span></span><br><span class="line"><span class="function">    _<span class="params">calculateChangedBits</span>: <span class="params">calculateChangedBits</span>,</span></span><br><span class="line"><span class="function">    // <span class="params">As</span> <span class="params">a</span> <span class="params">workaround</span> <span class="params">to</span> <span class="params">support</span> <span class="params">multiple</span> <span class="params">concurrent</span> <span class="params">renderers</span>, <span class="params">we</span> <span class="params">categorize</span></span></span><br><span class="line"><span class="function">    // <span class="params">some</span> <span class="params">renderers</span> <span class="params">as</span> <span class="params">primary</span> <span class="params">and</span> <span class="params">others</span> <span class="params">as</span> <span class="params">secondary</span>. <span class="params">We</span> <span class="params">only</span> <span class="params">expect</span></span></span><br><span class="line"><span class="function">    // <span class="params">there</span> <span class="params">to</span> <span class="params">be</span> <span class="params">two</span> <span class="params">concurrent</span> <span class="params">renderers</span> <span class="params">at</span> <span class="params">most</span>: <span class="params">React</span> <span class="params">Native</span> (<span class="params">primary</span>) <span class="params">and</span></span></span><br><span class="line"><span class="function">    // <span class="params">Fabric</span> (<span class="params">secondary</span>); <span class="params">React</span> <span class="params">DOM</span> (<span class="params">primary</span>) <span class="params">and</span> <span class="params">React</span> <span class="params">ART</span> (<span class="params">secondary</span>).</span></span><br><span class="line"><span class="function">    // <span class="params">Secondary</span> <span class="params">renderers</span> <span class="params">store</span> <span class="params">their</span> <span class="params">context</span> <span class="params">values</span> <span class="params">on</span> <span class="params">separate</span> <span class="params">fields</span>.</span></span><br><span class="line"><span class="function">    _<span class="params">currentValue</span>: <span class="params">defaultValue</span>,</span></span><br><span class="line"><span class="function">    _<span class="params">currentValue2</span>: <span class="params">defaultValue</span>,</span></span><br><span class="line"><span class="function">    // <span class="params">Used</span> <span class="params">to</span> <span class="params">track</span> <span class="params">how</span> <span class="params">many</span> <span class="params">concurrent</span> <span class="params">renderers</span> <span class="params">this</span> <span class="params">context</span> <span class="params">currently</span></span></span><br><span class="line"><span class="function">    // <span class="params">supports</span> <span class="params">within</span> <span class="params">in</span> <span class="params">a</span> <span class="params">single</span> <span class="params">renderer</span>. <span class="params">Such</span> <span class="params">as</span> <span class="params">parallel</span> <span class="params">server</span> <span class="params">rendering</span>.</span></span><br><span class="line"><span class="function">    _<span class="params">threadCount</span>: 0,</span></span><br><span class="line"><span class="function">    // <span class="params">These</span> <span class="params">are</span> <span class="params">circular</span></span></span><br><span class="line"><span class="function">    <span class="params">Provider</span>: (<span class="params"><span class="literal">null</span>: <span class="built_in">any</span></span>),</span></span><br><span class="line"><span class="function">    <span class="params">Consumer</span>: (<span class="params"><span class="literal">null</span>: <span class="built_in">any</span></span>),</span></span><br><span class="line"><span class="function">  &#125;;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  <span class="params">context</span>.<span class="params">Provider</span> = &#123;</span></span><br><span class="line"><span class="function">    $$<span class="params">typeof</span>: <span class="params">REACT_PROVIDER_TYPE</span>,</span></span><br><span class="line"><span class="function">    _<span class="params">context</span>: <span class="params">context</span>,</span></span><br><span class="line"><span class="function">  &#125;;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  //<span class="params">let</span> <span class="params">hasWarnedAboutUsingNestedContextConsumers</span> = <span class="params">false</span>;</span></span><br><span class="line"><span class="function">  //<span class="params">let</span> <span class="params">hasWarnedAboutUsingConsumerProvider</span> = <span class="params">false</span>;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  <span class="params">if</span> (<span class="params">__DEV__</span>) &#123;</span></span><br><span class="line"><span class="function">    //...一些检错代码</span></span><br><span class="line"><span class="function">  &#125; <span class="params">else</span> &#123;</span></span><br><span class="line"><span class="function">    <span class="params">context</span>.<span class="params">Consumer</span> = <span class="params">context</span>;</span></span><br><span class="line"><span class="function">  &#125;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  <span class="params">if</span> (<span class="params">__DEV__</span>) &#123;</span></span><br><span class="line"><span class="function">    <span class="params">context</span>._<span class="params">currentRenderer</span> = <span class="params">null</span>;</span></span><br><span class="line"><span class="function">    <span class="params">context</span>._<span class="params">currentRenderer2</span> = <span class="params">null</span>;</span></span><br><span class="line"><span class="function">  &#125;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  <span class="params">return</span> <span class="params">context</span>;</span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="createRef"><a href="#createRef" class="headerlink" title="createRef"></a>createRef</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> RefObject = &#123;|</span><br><span class="line">  current: <span class="built_in">any</span>,</span><br><span class="line">|&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">createRef</span>(<span class="params"></span>): <span class="title">RefObject</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> refObject = &#123;</span><br><span class="line">    current: <span class="literal">null</span>,</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">    <span class="built_in">Object</span>.seal(refObject);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> refObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="memo"><a href="#memo" class="headerlink" title="memo"></a>memo</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">memo</span>&lt;<span class="title">Props</span>&gt;(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">  <span class="keyword">type</span>: React$ElementType,</span></span></span><br><span class="line">  compare?: (oldProps: Props, newProps: Props) =&gt; boolean, //浅比较</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="comment">//检错</span></span><br><span class="line">  <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!isValidElementType(<span class="keyword">type</span>)) &#123;</span><br><span class="line">      <span class="built_in">console</span>.error(</span><br><span class="line">        <span class="string">'memo: The first argument must be a component. Instead '</span> +</span><br><span class="line">          <span class="string">'received: %s'</span>,</span><br><span class="line">        <span class="keyword">type</span> === <span class="literal">null</span> ? <span class="string">'null'</span> : <span class="keyword">typeof</span> <span class="keyword">type</span>,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    $$<span class="keyword">typeof</span>: REACT_MEMO_TYPE,</span><br><span class="line">    <span class="keyword">type</span>,</span><br><span class="line">    compare: compare === <span class="literal">undefined</span> ? <span class="literal">null</span> : compare,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="forwardRef"><a href="#forwardRef" class="headerlink" title="forwardRef"></a>forwardRef</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">forwardRef</span>&lt;<span class="title">Props</span>, <span class="title">ElementType</span>: <span class="title">React$ElementType</span>&gt;(<span class="params"></span></span></span><br><span class="line">  render: (props: Props, ref: React$Ref&lt;ElementType&gt;) =&gt; React$Node,</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="comment">//检错</span></span><br><span class="line">  <span class="keyword">if</span> (__DEV__) &#123;</span><br><span class="line">    <span class="keyword">if</span> (render != <span class="literal">null</span> &amp;&amp; render.$$<span class="keyword">typeof</span> === REACT_MEMO_TYPE) &#123;</span><br><span class="line">      <span class="built_in">console</span>.error(</span><br><span class="line">        <span class="string">'forwardRef requires a render function but received a `memo` '</span> +</span><br><span class="line">          <span class="string">'component. Instead of forwardRef(memo(...)), use '</span> +</span><br><span class="line">          <span class="string">'memo(forwardRef(...)).'</span>,</span><br><span class="line">      );</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> render !== <span class="string">'function'</span>) &#123;</span><br><span class="line">      <span class="built_in">console</span>.error(</span><br><span class="line">        <span class="string">'forwardRef requires a render function but was given %s.'</span>,</span><br><span class="line">        render === <span class="literal">null</span> ? <span class="string">'null'</span> : <span class="keyword">typeof</span> render,</span><br><span class="line">      );</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (render.length !== <span class="number">0</span> &amp;&amp; render.length !== <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(</span><br><span class="line">          <span class="string">'forwardRef render functions accept exactly two parameters: props and ref. %s'</span>,</span><br><span class="line">          render.length === <span class="number">1</span></span><br><span class="line">            ? <span class="string">'Did you forget to use the ref parameter?'</span></span><br><span class="line">            : <span class="string">'Any additional parameter will be undefined.'</span>,</span><br><span class="line">        );</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (render != <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (render.defaultProps != <span class="literal">null</span> || render.propTypes != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(</span><br><span class="line">          <span class="string">'forwardRef render functions do not support propTypes or defaultProps. '</span> +</span><br><span class="line">            <span class="string">'Did you accidentally pass a React component?'</span>,</span><br><span class="line">        );</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    $$<span class="keyword">typeof</span>: REACT_FORWARD_REF_TYPE,</span><br><span class="line">    render,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="react-dom包"><a href="#react-dom包" class="headerlink" title="react-dom包"></a>react-dom包</h1><h1 id="shared包"><a href="#shared包" class="headerlink" title="shared包"></a>shared包</h1><h2 id="Object-is-polyfill"><a href="#Object-is-polyfill" class="headerlink" title="Object.is polyfill"></a>Object.is polyfill</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">is</span>(<span class="params">x: <span class="built_in">any</span>, y: <span class="built_in">any</span></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    (x === y &amp;&amp; (x !== <span class="number">0</span> || <span class="number">1</span> / x === <span class="number">1</span> / y)) || (x !== x &amp;&amp; y !== y) <span class="comment">// eslint-disable-line no-self-compare</span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> objectIs: <span class="function">(<span class="params">x: <span class="built_in">any</span>, y: <span class="built_in">any</span></span>) =&gt;</span> <span class="built_in">boolean</span> =</span><br><span class="line">  <span class="keyword">typeof</span> <span class="built_in">Object</span>.is === <span class="string">'function'</span> ? <span class="built_in">Object</span>.is : is;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> objectIs;</span><br></pre></td></tr></table></figure>
+<h2 id="shallowEqual"><a href="#shallowEqual" class="headerlink" title="shallowEqual"></a>shallowEqual</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> is <span class="keyword">from</span> <span class="string">'./objectIs'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> hasOwnProperty = <span class="built_in">Object</span>.prototype.hasOwnProperty;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Performs equality by iterating through keys on an object and returning false</span></span><br><span class="line"><span class="comment"> * when any key has values which are not strictly equal between the arguments.</span></span><br><span class="line"><span class="comment"> * Returns true when the values of all keys are strictly equal.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">shallowEqual</span>(<span class="params">objA: mixed, objB: mixed</span>): <span class="title">boolean</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (is(objA, objB)) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (</span><br><span class="line">    <span class="keyword">typeof</span> objA !== <span class="string">'object'</span> ||</span><br><span class="line">    objA === <span class="literal">null</span> ||</span><br><span class="line">    <span class="keyword">typeof</span> objB !== <span class="string">'object'</span> ||</span><br><span class="line">    objB === <span class="literal">null</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> keysA = <span class="built_in">Object</span>.keys(objA);</span><br><span class="line">  <span class="keyword">const</span> keysB = <span class="built_in">Object</span>.keys(objB);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (keysA.length !== keysB.length) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Test for A's keys different from B.</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; keysA.length; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (</span><br><span class="line">      !hasOwnProperty.call(objB, keysA[i]) ||</span><br><span class="line">      !is(objA[keysA[i]], objB[keysA[i]])</span><br><span class="line">    ) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> shallowEqual;</span><br></pre></td></tr></table></figure>
+<h2 id="endsWith"><a href="#endsWith" class="headerlink" title="endsWith"></a>endsWith</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">endsWith</span>(<span class="params">subject: <span class="built_in">string</span>, search: <span class="built_in">string</span></span>): <span class="title">boolean</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> length = subject.length;</span><br><span class="line">  <span class="keyword">return</span> subject.substring(length - search.length, length) === search;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2020/01/22/重读React文档的一些记录/" title= 重读React文档的一些记录 >
+                    <div class="prevTitle">重读React文档的一些记录</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!--PC和WAP自适应版-->
+
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:643342586@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/CallMeSaltyF1sh" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#react包"><span class="toc-number">1.</span> <span class="toc-text">react包</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Component和PureComponent"><span class="toc-number">1.1.</span> <span class="toc-text">Component和PureComponent</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ReactElement"><span class="toc-number">1.2.</span> <span class="toc-text">ReactElement</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ReactContext"><span class="toc-number">1.3.</span> <span class="toc-text">ReactContext</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#createRef"><span class="toc-number">1.4.</span> <span class="toc-text">createRef</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#memo"><span class="toc-number">1.5.</span> <span class="toc-text">memo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#forwardRef"><span class="toc-number">1.6.</span> <span class="toc-text">forwardRef</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#react-dom包"><span class="toc-number">2.</span> <span class="toc-text">react-dom包</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#shared包"><span class="toc-number">3.</span> <span class="toc-text">shared包</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Object-is-polyfill"><span class="toc-number">3.1.</span> <span class="toc-text">Object.is polyfill</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#shallowEqual"><span class="toc-number">3.2.</span> <span class="toc-text">shallowEqual</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#endsWith"><span class="toc-number">3.3.</span> <span class="toc-text">endsWith</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 12
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/29</span><a class="archive-post-title" href= "/2020/01/29/React源码阅读/" >React源码阅读</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/22</span><a class="archive-post-title" href= "/2020/01/22/重读React文档的一些记录/" >重读React文档的一些记录</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/06</span><a class="archive-post-title" href= "/2019/08/06/ES6常用新特性整理/" >ES6常用新特性整理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/25</span><a class="archive-post-title" href= "/2019/07/25/Redux学习笔记/" >Redux学习笔记</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2019/07/08/使用express-MySQL实现数据接口并部署/" >使用express+MySQL实现数据接口并部署</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2019/07/05/JavaScript数据结构与算法学习/" >JavaScript数据结构与算法学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span><a class="archive-post-title" href= "/2019/04/02/JS之闭包和原型那些事儿/" >JS之闭包和原型那些事儿</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/05</span><a class="archive-post-title" href= "/2019/02/05/Ajax学习笔记/" >Ajax学习笔记</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/12</span><a class="archive-post-title" href= "/2018/11/12/深入学习CSS布局/" >深入学习CSS布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/Sqli-Labs-Study/" >Sqli-Labs Study</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/25</span><a class="archive-post-title" href= "/2018/08/25/Bugku-SQL注入题目总结/" >Bugku SQL注入题目总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/11</span><a class="archive-post-title" href= "/2018/08/11/New-Start/" >New Start</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="SQL"><span class="iconfont-archer">&#xe606;</span>SQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
+    
+        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
+    
+        <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
+    
+        <span class="sidebar-tag-name" data-tags="Express"><span class="iconfont-archer">&#xe606;</span>Express</span>
+    
+        <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="数据结构与算法"><span class="iconfont-archer">&#xe606;</span>数据结构与算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="React"><span class="iconfont-archer">&#xe606;</span>React</span>
+    
+        <span class="sidebar-tag-name" data-tags="Redux"><span class="iconfont-archer">&#xe606;</span>Redux</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ES6"><span class="iconfont-archer">&#xe606;</span>ES6</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "John Doe"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
