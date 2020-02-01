@@ -409,7 +409,7 @@ height:50vh;
 <p>componentDidUpdate(prevProps, preState, snapshot)会在更新后立即被调用，首次渲染不会执行。注意如果在componentDidUpdate()中调用setState()要在外面套条件语句，对更新前后的props进行比较，否则会死循环和额外渲染。</p>
 <p>getSnapshotBeforeUpdate() 在最近一次渲染输出（提交到 DOM 节点）之前调用，使得组件能在发生更改之前从 DOM 中捕获一些信息（如滚动位置）。 如果组件实现了 getSnapshotBeforeUpdate() 生命周期（不常用），则它的返回值将作为 componentDidUpdate() 的第三个参数 “snapshot” 传递。 </p>
 <p><strong>componentWillMount()，componentWillReceiveProps()，componentWillUpdate() “已过时”不建议使用。</strong></p>
-<h3 id="setState"><a href="#setState" class="headerlink" title="setState()"></a>setState()</h3><p>setState()异步更新可以接收对象或者函数作为第一个参数，当需要基于之前的state和props更新当前state（后续状态取决于当前状态，避免合并覆盖）则需传入updater函数作为参数。</p>
+<h3 id="setState"><a href="#setState" class="headerlink" title="setState()"></a>setState()</h3><p>setState()异步更新可以接收对象或者函数作为第一个参数，若需要基于之前的state和props更新当前state（后续状态取决于当前状态，避免合并覆盖）则需传入updater函数作为参数。</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//setState(updater[, callback])</span></span><br><span class="line"><span class="comment">//example1</span></span><br><span class="line"><span class="keyword">this</span>.setState(<span class="function">(<span class="params">state</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123; <span class="attr">quantity</span>: state.quantity + <span class="number">1</span> &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//example2</span></span><br><span class="line"><span class="keyword">this</span>.setState(<span class="function">(<span class="params">state, props</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//参数为上一个state值和此次更新被应用时的props</span></span><br><span class="line">    <span class="keyword">return</span> &#123; <span class="attr">counter</span>: state.counter + props.step &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p>为什么setState是异步批量更新？</p>
 <ol>
@@ -837,16 +837,6 @@ top:50vh;
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 12
@@ -950,9 +940,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
     
-        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
-    
         <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
+    
+        <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
     
         <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
     
