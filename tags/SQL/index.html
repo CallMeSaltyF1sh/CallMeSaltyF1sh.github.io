@@ -385,11 +385,11 @@ localhost/sqli-labs-master/Less-1/?id=1&#39;出现报错：You have an error ...
                 <span>Bugku SQL注入题目总结</span>
         </a>
         <div class="abstract-content">
-            Bugku SQL注入题目总结sql注入查看源码发现网页编码为gb2312，猜测考的是宽字节注入。
-关于宽字节注入可以参考大佬的详解：戳这里
+            Bugku SQL注入题目总结sql注入查看源码发现网页编码为gb2312，猜测是宽字节注入。
+关于宽字节注入可以参考详解：戳这里
 果然输入?id=1%df&#39;出现了报错，说明已经可以注入了。1%df%27被转换成了1運，原因就是单引号前被添加了转义符\，即%5c，在这里前面的%df和%5c结合形成了汉字，导致单引号成功逃逸。下面就可以直接操作了。
 ?id=1%df&#39;and version()&gt;0 --+返回正确，说明数据库可能是sqlserver或者mysql
-?id=1%bf&#39; and length(user())&gt;0 --+返回正确，说明...
+?id=1%bf&#39; and length(user())&gt;0 --+返回正确，说明存在use...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
@@ -489,6 +489,16 @@ localhost/sqli-labs-master/Less-1/?id=1&#39;出现报错：You have an error ...
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -710,9 +720,9 @@ localhost/sqli-labs-master/Less-1/?id=1&#39;出现报错：You have an error ...
     
         <span class="sidebar-tag-name" data-tags="BugkuCTF"><span class="iconfont-archer">&#xe606;</span>BugkuCTF</span>
     
-        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
-    
         <span class="sidebar-tag-name" data-tags="Life"><span class="iconfont-archer">&#xe606;</span>Life</span>
+    
+        <span class="sidebar-tag-name" data-tags="Ajax"><span class="iconfont-archer">&#xe606;</span>Ajax</span>
     
         <span class="sidebar-tag-name" data-tags="Node.js"><span class="iconfont-archer">&#xe606;</span>Node.js</span>
     
