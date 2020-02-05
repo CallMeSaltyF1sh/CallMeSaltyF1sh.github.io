@@ -344,9 +344,9 @@
                 <span>React源码阅读</span>
         </a>
         <div class="abstract-content">
-            React CoreReact Core只包含定义组件必要的 API，同时适用于 React DOM 和 React Native 组件。 
-基本组成结构
-123456789101112131415161718192021222324252627282930313233343536373839404142const React = &#123;  Children: &#123;    map,    forEach,    count,    toArray,    only,  &#125;,  createRef,  Component,  PureComponent,  crea...
+            OverviewReact 核心代码在源码的 packages/react 目录中。在 npm 上发布为 react包。相应的独立浏览器构建版本称为 react.js，它会导出一个称为 React 的全局对象。
+渲染器同样位于 packages/目录下，React DOM Renderer 将 React 组件渲染成 DOM。它实现了全局 ReactDOMAPI，这在npm上作为 react-dom 包。这也可以作为单独浏览器版本使用，称为 react-dom.js，导出一个 ReactDOM 的全局对象。
+Fiber reconciler源代码在 packages/react-reco...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
